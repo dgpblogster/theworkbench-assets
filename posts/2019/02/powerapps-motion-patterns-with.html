@@ -14,3 +14,62 @@ Until next post,<br />
 <br />
 MG.-<br />
 Mariano Gomez, MVP
+<hr />
+<b>UPDATE (August 2026)</b><br />
+<br />
+<p>
+Just recently, while modernizing this blog and dragging 18 years of content onto a new
+look, I landed back on this very post and realized two things: the parametric equations
+are every bit as beautiful as they were in 2019, and the download link above, sadly, no
+longer works, as the old PowerApps Community Apps Gallery has since been retired and the
+link now drops you on a generic community homepage. That just wouldn't do!
+</p>
+<p>
+So, I rebuilt the whole experiment from scratch as a single canvas app called
+<b>Parametric Motions</b>, and this time around the app does quite a bit more than the
+original: each curve gets its own screen, a small circle traces the pattern across a dark
+plotting surface leaving a colored trail behind it, and a set of sliders lets you change
+the equation parameters live (frequencies and phase for the Lissajous, petal count for
+the Rose, revolutions for the Spiral, and the classic R, r, and d trio for the
+Hypotrochoid). Move a slider and the trace restarts with the new shape. Very cool! And if
+you are curious how far it has come, you can always visit the
+<a href="https://www.youtube.com/watch?v=7Bk0_cSGVXk" rel="noopener" target="_blank">original video</a>
+of the 2019 version, which is also embedded just above.
+</p>
+<p>
+You may be asking how the trail gets drawn, since canvas apps still have no native
+plotting surface for this sort of thing. Very simple: a repeating Timer control advances
+a step counter, and an Image control renders an inline SVG polyline whose points come
+from a <code>Concat(Sequence(...))</code> formula evaluating the equations at 600 samples
+along the curve. Everything in the app derives from that one counter plus the slider
+values, so pause, resume, and restart are each a one line formula, and that's always a
+good thing.
+</p>
+<p>
+As it turns out, the tooling has changed quite a bit since 2019 as well. Canvas apps can
+now be authored as readable YAML source code (the *.pa.yaml format), so instead of a
+binary msapp attachment sitting in a long gone gallery, the full source now lives on
+GitHub together with a Dataverse solution wrapper and a build script that packs and
+imports the whole thing with the Power Platform CLI:
+</p>
+<ul>
+<li><a href="https://github.com/dgpblogster/power-apps-fun" rel="noopener" target="_blank">github.com/dgpblogster/power-apps-fun</a> (the app lives in the <code>parametric-motions</code> folder, and the README walks you through cloning, authenticating, and deploying)</li>
+</ul>
+<p>
+NOTE: After importing the solution, be sure to open the app for edit in Power Apps Studio
+once, then save and publish. Apps packed from YAML source are validated on first open.
+</p>
+<p>
+Suffice to say, I did not type every line of YAML myself: the rebuild was pair-built with
+Claude, Anthropic's AI coding agent, working against Microsoft's
+<a href="https://github.com/microsoft/power-platform-skills" rel="noopener" target="_blank">power-platform-skills</a>
+guidance and the pac CLI, from the parametric formulas all the way down to the solution
+import. The math has not changed since 1815; the tooling most certainly has!
+</p>
+<p>
+Until next post!<br />
+<br />
+MG.-<br />
+Mariano Gomez Bent<br />
+Former Microsoft BizApps MVP
+</p>
