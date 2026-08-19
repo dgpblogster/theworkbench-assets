@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1200px; height:630px; overflow:hidden; }
+  body {
+    background:
+      radial-gradient(ellipse at 85% 15%, rgba(26,160,230,.12), transparent 55%),
+      linear-gradient(135deg, #0C1B33 0%, #10233F 60%, #0C1B33 100%);
+    font-family:'Inter','Segoe UI',sans-serif;
+    color:#E8EEF6;
+    position:relative;
+  }
+  .grid {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(26,160,230,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,160,230,.05) 1px, transparent 1px);
+    background-size:48px 48px;
+  }
+  .frame { position:absolute; inset:0; padding:54px 64px; display:flex; flex-direction:column; }
+  .brand { font-family:'JetBrains Mono',Consolas,monospace; font-size:22px; color:#8FA3BC; letter-spacing:.04em; }
+  .brand .tick { color:#1AA0E6; font-weight:600; }
+  .brand b { color:#E8EEF6; font-weight:600; }
+  .mid { flex:1; display:flex; align-items:center; gap:48px; }
+  .text { width:600px; }
+  .kicker { font-family:'JetBrains Mono',Consolas,monospace; font-size:19px; letter-spacing:.16em; color:#1AA0E6; margin-bottom:22px; }
+  h1 { font-size:64px; font-weight:800; letter-spacing:-0.025em; line-height:1.06; margin-bottom:20px; }
+  .sub { font-size:29px; color:#B9C7DA; font-weight:500; letter-spacing:-0.01em; }
+  .sub em { color:#6CC6F2; font-style:normal; }
+  .diagram { flex:1; display:flex; flex-direction:column; gap:26px; }
+  .arch { background:rgba(27,53,87,.55); border:1px solid #274672; border-radius:14px; padding:20px 22px 22px; }
+  .arch.win { border-color:rgba(26,160,230,.65); box-shadow:0 0 34px rgba(26,160,230,.14); }
+  .arch-label { font-family:'JetBrains Mono',Consolas,monospace; font-size:15px; letter-spacing:.12em; color:#8FA3BC; margin-bottom:14px; }
+  .arch.win .arch-label { color:#6CC6F2; }
+  .row { display:flex; align-items:center; gap:0; }
+  .node {
+    font-family:'JetBrains Mono',Consolas,monospace; font-size:15px; font-weight:600;
+    background:#10233F; border:1px solid #3B5A85; border-radius:8px;
+    padding:10px 14px; color:#E8EEF6; white-space:nowrap;
+  }
+  .node.src { border-color:#274672; color:#B9C7DA; font-weight:400; }
+  .node.mcp { border-color:#1AA0E6; color:#6CC6F2; }
+  .wire { height:2px; background:#3B5A85; flex:1; min-width:26px; position:relative; }
+  .wire.lit { background:#1AA0E6; }
+  .wire.dead { background:repeating-linear-gradient(90deg,#7A4C55 0 6px,transparent 6px 12px); }
+  .fanout { display:flex; flex-direction:column; gap:8px; flex:1; }
+  .branch { display:flex; align-items:center; }
+  .branch .wire { min-width:22px; }
+  .no { font-family:'JetBrains Mono',Consolas,monospace; font-size:12px; color:#D08A96; margin-left:8px; white-space:nowrap; }
+  .foot { display:flex; justify-content:space-between; align-items:flex-end; }
+  .byline { font-family:'JetBrains Mono',Consolas,monospace; font-size:18px; color:#8FA3BC; }
+  .byline .at { color:#1AA0E6; }
+  .rule { position:absolute; left:64px; right:64px; bottom:118px; height:1px; background:linear-gradient(90deg, rgba(26,160,230,.5), transparent 70%); }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="frame">
+  <div class="brand"><span class="tick">//</span> <b>The Workbench</b></div>
+
+  <div class="mid">
+    <div class="text">
+      <div class="kicker">// COPILOT STUDIO + WEB API</div>
+      <h1>It's All Just<br/>Dataverse Rows</h1>
+      <div class="sub">Knowledge sources <em>from the Web API</em></div>
+    </div>
+
+    <div class="diagram">
+      <div class="arch">
+        <div class="arch-label">THE DOCUMENTED PATH</div>
+        <div class="row">
+          <div class="node src">MAKER UI</div>
+          <div class="wire"></div>
+          <div class="node src">CLICKS</div>
+          <div class="wire dead"></div>
+          <div class="node src">PIPELINE</div>
+          <div class="no">rejected</div>
+        </div>
+      </div>
+      <div class="arch win">
+        <div class="arch-label">WHAT THE UI ACTUALLY WRITES</div>
+        <div class="row">
+          <div class="node">POST</div>
+          <div class="wire lit"></div>
+          <div class="node mcp">dvtablesearch</div>
+          <div class="wire lit" style="flex:0; min-width:18px;"></div>
+          <div class="fanout">
+            <div class="branch"><div class="wire lit"></div><div class="node src">botcomponent 16</div></div>
+            <div class="branch"><div class="wire lit"></div><div class="node src">AGENT</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="byline">Mariano Gomez Bent</div>
+    <div class="byline"><span class="at">www.</span>theworkbench.blog</div>
+  </div>
+</div>
+</body>
+</html>
