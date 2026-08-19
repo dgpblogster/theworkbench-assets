@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The Workbench &#8212; theme preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0C1B33; --bg-raised: #10233F; --card: #1B3557; --card-border: #274672;
+    --text: #E8EEF6; --text-soft: #B9C7DA; --muted: #8FA3BC;
+    --accent: #1AA0E6; --accent-soft: #BFE3F7;
+    --code-bg: #0A1628; --code-border: #223D63;
+    --chip-bg: rgba(26,160,230,.14); --shadow: 0 10px 30px rgba(2,8,20,.45);
+  }
+  [data-theme="light"] {
+    --bg:#FFFFFF; --bg-raised:#F8FBFD; --card:#F2F8FC; --card-border:#D7E7F2;
+    --text:#10233F; --text-soft:#334155; --muted:#64748B;
+    --accent:#0F84C2; --accent-soft:#1AA0E6;
+    --chip-bg: rgba(26,160,230,.12); --shadow: 0 8px 24px rgba(16,35,63,.10);
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; font-size:17px; line-height:1.7; transition:background-color .25s, color .25s; }
+  a { color:var(--accent); text-decoration:none; }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 24px; }
+  .topbar { background:var(--bg-raised); border-bottom:1px solid var(--card-border); position:sticky; top:0; z-index:50; }
+  .topbar-inner { display:flex; align-items:center; gap:20px; padding:14px 0; }
+  .brand { display:flex; flex-direction:column; gap:2px; }
+  .site-title { font-weight:800; font-size:1.35rem; letter-spacing:-.02em; color:var(--text); white-space:nowrap; }
+  .site-title .tick { color:var(--accent); }
+  .byline { margin:0; font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--muted); }
+  .topbar-spacer { flex:1; }
+  .site-nav { display:flex; gap:4px; flex-wrap:wrap; }
+  .site-nav a { color:var(--text-soft); font-size:.92rem; font-weight:500; padding:7px 12px; border-radius:8px; }
+  .site-nav a:hover { color:var(--text); background:var(--card); }
+  .search-form input { background:var(--card); border:1px solid var(--card-border); color:var(--text); border-radius:8px; padding:7px 12px; font:inherit; font-size:.88rem; width:150px; }
+  .search-form input::placeholder { color:var(--muted); }
+  .theme-toggle { background:var(--card); border:1px solid var(--card-border); color:var(--text); border-radius:8px; width:36px; height:36px; cursor:pointer; font-size:1rem; }
+  .topbar-tools { display:flex; align-items:center; gap:8px; }
+  .hero { padding:56px 0 8px; }
+  .hero .kicker { font-family:'JetBrains Mono',monospace; font-size:.78rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 10px; }
+  .hero h1 { margin:0 0 10px; font-size:clamp(1.7rem,4vw,2.5rem); font-weight:800; letter-spacing:-.03em; line-height:1.15; }
+  .hero p { margin:0; color:var(--muted); max-width:640px; }
+  .post-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; padding:32px 0 16px; }
+  .card { background:var(--card); border:1px solid var(--card-border); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; transition:transform .18s, box-shadow .18s, border-color .18s; }
+  .card:hover { transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--accent); }
+  .card-thumb { display:block; aspect-ratio:16/9; background:linear-gradient(135deg,#1B3557,#0F84C2 140%); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; color:var(--accent-soft); font-size:.8rem; }
+  .card-body { padding:18px 20px 20px; display:flex; flex-direction:column; gap:10px; flex:1; }
+  .card-meta { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--muted); }
+  .card h2 { margin:0; font-size:1.08rem; line-height:1.4; }
+  .card h2 a { color:var(--text); }
+  .card h2 a:hover { color:var(--accent); }
+  .card .snippet { margin:0; font-size:.9rem; color:var(--muted); flex:1; }
+  .card .read-more { font-size:.85rem; font-weight:600; color:var(--accent); }
+  .chip { display:inline-block; background:var(--chip-bg); color:var(--accent-soft); border-radius:999px; padding:2px 10px; font-family:'JetBrains Mono',monospace; font-size:.68rem; }
+  [data-theme="light"] .chip { color:var(--accent); }
+  .chip.archive { background:rgba(148,163,184,.16); color:var(--muted); }
+  .site-footer { background:var(--bg-raised); border-top:1px solid var(--card-border); margin-top:40px; padding:36px 0; font-size:.88rem; color:var(--muted); }
+  .site-footer .wrap { display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+  .footer-heritage { font-family:'JetBrains Mono',monospace; font-size:.75rem; }
+  .preview-note { background:var(--chip-bg); border-left:3px solid var(--accent); padding:10px 16px; font-size:.85rem; color:var(--text-soft); }
+</style>
+</head>
+<body>
+<div class="preview-note wrap">Theme preview with sample data. Use the &#9788; button to see light mode. Cards marked <span class="chip archive">archive</span> show how pre-2025 posts are flagged.</div>
+
+<div class="topbar">
+  <div class="topbar-inner wrap">
+    <div class="brand">
+      <a class="site-title" href="#"><span class="tick">//</span> The Workbench</a>
+      <p class="byline">by Mariano Gomez, Former Microsoft MVP (2008-2024)</p>
+    </div>
+    <div class="topbar-spacer"></div>
+    <nav class="site-nav">
+      <a href="#">Home</a><a href="#">Learning Resources</a><a href="#">SQL Scripts</a><a href="#">Modifier with VBA</a>
+    </nav>
+    <div class="topbar-tools">
+      <form class="search-form" onsubmit="return false"><input type="search" placeholder="Search..."/></form>
+      <button class="theme-toggle" id="themeToggle" type="button">&#9788;</button>
+    </div>
+  </div>
+</div>
+
+<div class="hero wrap">
+  <p class="kicker">// hands-on notes</p>
+  <h1>The Workbench</h1>
+  <p>Hands-on with AI, Copilot Studio, and the Power Platform.</p>
+</div>
+
+<div class="post-grid wrap">
+  <article class="card">
+    <a class="card-thumb" href="#">[ featured image ]</a>
+    <div class="card-body">
+      <div class="card-meta"><time>2026-08-10</time></div>
+      <h2><a href="#">Building a Copilot Studio agent that actually knows your business data</a></h2>
+      <p class="snippet">A future post: grounding a custom agent on Dataverse and Business Central data, with the guardrails that make it safe to hand to users.</p>
+      <a class="read-more" href="#">Read the post &#8594;</a>
+    </div>
+  </article>
+  <article class="card">
+    <a class="card-thumb" href="#">[ featured image ]</a>
+    <div class="card-body">
+      <div class="card-meta"><time>2021-08-12</time><span class="chip archive">archive</span></div>
+      <h2><a href="#">Power Apps - Application Monitoring with Azure Application Insights</a></h2>
+      <p class="snippet">In this video, learn to enable Power Apps Application Monitoring with Azure Application Insights.</p>
+      <a class="read-more" href="#">Read the post &#8594;</a>
+    </div>
+  </article>
+  <article class="card">
+    <a class="card-thumb" href="#">[ featured image ]</a>
+    <div class="card-body">
+      <div class="card-meta"><time>2021-08-03</time><span class="chip archive">archive</span></div>
+      <h2><a href="#">Power Platform ALM - Visual Studio Code Extensions</a></h2>
+      <p class="snippet">Learn about the Power Platform extension for Visual Studio Code and how this toolset improves the code-first developer experience.</p>
+      <a class="read-more" href="#">Read the post &#8594;</a>
+    </div>
+  </article>
+  <article class="card">
+    <a class="card-thumb" href="#">[ featured image ]</a>
+    <div class="card-body">
+      <div class="card-meta"><time>2020-11-10</time><span class="chip archive">archive</span></div>
+      <h2><a href="#">AI Builder Form Processing: Multi-layout Form Processing</a></h2>
+      <p class="snippet">Multi-layout form processing has been one of the most requested features and is now available in preview.</p>
+      <a class="read-more" href="#">Read the post &#8594;</a>
+    </div>
+  </article>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div>The Workbench, by Mariano Gomez, Former Microsoft MVP (2008-2024). <a href="https://youtube.com/user/mgomezb1">YouTube</a></div>
+    <div class="footer-heritage">est. 2008 as The Dynamics GP Blogster</div>
+  </div>
+</footer>
+
+<script>
+  var root=document.documentElement, btn=document.getElementById('themeToggle');
+  btn.addEventListener('click',function(){
+    if(root.hasAttribute('data-theme')){root.removeAttribute('data-theme');btn.textContent='☀';}
+    else{root.setAttribute('data-theme','light');btn.textContent='☾';}
+  });
+</script>
+</body>
+</html>

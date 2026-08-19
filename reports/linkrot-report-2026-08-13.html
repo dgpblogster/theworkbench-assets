@@ -1,0 +1,146 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Workbench — Archive Link-Rot Report (2026-08-13)</title><style>
+body { background:#fff; color:#1a1a1a; font-family:'Segoe UI',system-ui,sans-serif; line-height:1.6; max-width:900px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+h1 { color:#1e293b; font-size:1.6rem; } h2 { color:#1e293b; border-bottom:2px solid #1AA0E6; padding-bottom:0.3rem; margin-top:2.4rem; font-size:1.2rem; }
+.tiles { display:flex; gap:1rem; flex-wrap:wrap; margin:1.5rem 0; }
+.tile { background:#f2f8fc; border:1px solid #d7e7f2; border-radius:10px; padding:0.9rem 1.3rem; min-width:150px; }
+.tile .n { font-size:1.7rem; font-weight:800; color:#1e293b; } .tile.bad .n { color:#b91c1c; } .tile.warn .n { color:#b45309; }
+.tile .l { font-size:0.78rem; color:#64748b; }
+table { border-collapse:collapse; width:100%; font-size:0.85rem; margin:1rem 0; }
+th, td { border:1px solid #cbd5e1; padding:0.45rem 0.6rem; text-align:left; vertical-align:top; }
+th { background:#eef2f6; } td:first-child { white-space:nowrap; }
+.note { background:#fef3c7; border-left:4px solid #f59e0b; border-radius:6px; padding:0.8rem 1.1rem; font-size:0.9rem; margin:1rem 0; }
+.ok { background:#ecfdf5; border-left:4px solid #10b981; border-radius:6px; padding:0.8rem 1.1rem; font-size:0.9rem; margin:1rem 0; }
+a { color:#0F84C2; }
+</style></head><body>
+<h1>The Workbench &mdash; Archive Link-Rot Report</h1>
+<p>Scanned 2026-08-13: all <strong>1,089 live posts</strong>, extracting every video embed and outbound link. Videos verified against YouTube/Vimeo oEmbed; 2,894 unique links checked over HTTP (deduplicated from 5,261 total). Diagnostic only &mdash; nothing has been edited.</p>
+<div class="tiles">
+<div class="tile"><div class="n">1,089</div><div class="l">posts scanned</div></div>
+<div class="tile"><div class="n">2,894</div><div class="l">unique links checked</div></div>
+<div class="tile bad"><div class="n">608</div><div class="l">hard-dead links (404/410/DNS)</div></div>
+<div class="tile warn"><div class="n">~930</div><div class="l">suspicious (403/503/429)</div></div>
+<div class="tile bad"><div class="n">51</div><div class="l">dead/restricted videos (of 144)</div></div>
+<div class="tile warn"><div class="n">958</div><div class="l">posts with &ge;1 dead link</div></div>
+</div>
+
+<h2>Read this first: what the numbers mean</h2>
+<p>An 18-year archive pointing heavily at retired Microsoft properties was always going to look like this. <strong>88% of posts carry at least one dead link</strong>, but the deadness is highly concentrated: PartnerSource/CustomerSource (retired), blogs.msdn.com (retired), SkyDrive, old KB URLs, and defunct event sites account for most of it. A dead PartnerSource link in a 2009 payroll-tax post is historically inert &mdash; it harms no reader and no SEO worth chasing. The actionable subset is much smaller and is called out below.</p>
+<div class="note"><strong>Honest caveats:</strong> the ~930 "suspicious" links are NOT confirmed dead. 429/999 responses are rate-limiting from scanning 12-wide (LinkedIn and this blog's own blogspot self-links dominate that bucket &mdash; the self-links redirect fine in a browser). Many 403s are bot-blocking, not deadness. blogs.msdn.com URLs (442 of the suspicious) mostly redirect to Microsoft's Learn archive &mdash; degraded, not always gone. Treat "suspicious" as "needs a human click if the post matters."</div>
+
+<h2>Videos: 51 dead or restricted, plus a Flash problem</h2>
+<p>Of 144 unique embedded videos: <strong>93 still play</strong>, 25 are deleted (404), 25 are private/restricted (403), 1 unreachable. Separately, <strong>28 embeds across 22 posts still use the 2008-era Flash player</strong> (<code>&lt;object&gt;/&lt;embed&gt;</code>), which no browser has rendered since 2021 &mdash; <strong>12 of those videos are still alive on YouTube</strong> and would play again if converted to modern iframes:</p>
+<h3>Flash embeds whose videos are still alive (convertible &mdash; the quick win)</h3>
+<table><tr><th>Date</th><th>Post</th><th>YouTube ID</th></tr><tr><td>2012-11-15</td><td><a href="https://www.theworkbench.blog/2012/11/another-reason-to-attend-microsoft.html" target="_blank">Another reason to attend Microsoft Dynamics Convergence 2013: Matchbox Twenty</a></td><td>-8WLa6umgdw</td></tr>
+<tr><td>2009-10-06</td><td><a href="https://www.theworkbench.blog/2009/10/technology-corner-microsoft-office-2010.html" target="_blank">The Technology Corner - Microsoft Office 2010 and Microsoft Dynamics GP v10</a></td><td>-vU9Up_2644</td></tr>
+<tr><td>2012-03-15</td><td><a href="https://www.theworkbench.blog/2012/03/microsoft-dynamics-convergence-houston_15.html" target="_blank">Microsoft Dynamics Convergence Houston 2012 - Satisfaction: Rolling Stones Triubute Band</a></td><td>55pcXwxRHQY</td></tr>
+<tr><td>2012-07-17</td><td><a href="https://www.theworkbench.blog/2012/07/dynamic-business.html" target="_blank">Dynamic Business</a></td><td>iO8HZLR8-G4</td></tr>
+<tr><td>2011-10-26</td><td><a href="https://www.theworkbench.blog/2011/10/mvp-jivtesh-singh-shows-power-of.html" target="_blank">MVP Jivtesh Singh shows the power of Business Analyzer with Windows tablets</a></td><td>KyG-zZTPnX0</td></tr>
+<tr><td>2010-06-19</td><td><a href="https://www.theworkbench.blog/2010/06/multilingual-gp.html" target="_blank">Multilingual GP</a></td><td>OmgykJpcgKg</td></tr>
+<tr><td>2010-06-19</td><td><a href="https://www.theworkbench.blog/2010/06/multilingual-gp.html" target="_blank">Multilingual GP</a></td><td>oTdYp719irc</td></tr>
+<tr><td>2011-10-26</td><td><a href="https://www.theworkbench.blog/2011/10/mvp-jivtesh-singh-shows-power-of.html" target="_blank">MVP Jivtesh Singh shows the power of Business Analyzer with Windows tablets</a></td><td>Sd2uPxoHbec</td></tr>
+<tr><td>2014-01-06</td><td><a href="https://www.theworkbench.blog/2014/01/first-reason-to-attend-microsoft.html" target="_blank">First reason to attend Microsoft Dynamics Convergence 2014: Fun.</a></td><td>Sv6dMFF_yts</td></tr>
+<tr><td>2014-08-29</td><td><a href="https://www.theworkbench.blog/2014/08/microsoft-dynamics-gp-2015-developers_29.html" target="_blank">Microsoft Dynamics GP 2015 Developer&#39;s Preview: Loading the VHD image - Part 1</a></td><td>TKA5k51XIA8</td></tr>
+<tr><td>2009-10-17</td><td><a href="https://www.theworkbench.blog/2009/10/technology-corner-microsoft-office-2010_17.html" target="_blank">The Technology Corner - Microsoft Office 2010 The Movie</a></td><td>VUawhjxLS2I</td></tr>
+<tr><td>2010-06-19</td><td><a href="https://www.theworkbench.blog/2010/06/multilingual-gp.html" target="_blank">Multilingual GP</a></td><td>Wt4WwouQ-a0</td></tr>
+</table>
+<h3>All dead / restricted / broken-player videos</h3>
+<table><tr><th>Date</th><th>Post</th><th>Player</th><th>Video</th><th>Verdict</th></tr><tr><td>2009-06-27</td><td><a href="https://www.theworkbench.blog/2009/06/google-it-with-bing.html" target="_blank">Google it with Bing!</a></td><td>YouTube (Flash player)</td><td>K0MKdjG1F_c</td><td>private/restricted</td></tr>
+<tr><td>2009-10-06</td><td><a href="https://www.theworkbench.blog/2009/10/technology-corner-microsoft-office-2010.html" target="_blank">The Technology Corner - Microsoft Office 2010 and Microsoft Dynamics GP v10</a></td><td>Other</td><td>http://www.microsoft.com/video/en/us/player/embed/0a26c54d-1620-40da-9fab-bfd76ca1e0d6</td><td>deleted</td></tr>
+<tr><td>2009-10-06</td><td><a href="https://www.theworkbench.blog/2009/10/technology-corner-microsoft-office-2010.html" target="_blank">The Technology Corner - Microsoft Office 2010 and Microsoft Dynamics GP v10</a></td><td>Other</td><td>http://www.microsoft.com/video/en/us/player/embed/353cad6b-400f-44bb-88c3-ecfaa1b4ad35</td><td>deleted</td></tr>
+<tr><td>2009-10-06</td><td><a href="https://www.theworkbench.blog/2009/10/technology-corner-microsoft-office-2010.html" target="_blank">The Technology Corner - Microsoft Office 2010 and Microsoft Dynamics GP v10</a></td><td>Other</td><td>http://www.microsoft.com/video/en/us/player/embed/532f0ede-8e45-4df7-a017-06eeae54d25d</td><td>deleted</td></tr>
+<tr><td>2009-10-06</td><td><a href="https://www.theworkbench.blog/2009/10/technology-corner-microsoft-office-2010.html" target="_blank">The Technology Corner - Microsoft Office 2010 and Microsoft Dynamics GP v10</a></td><td>Other</td><td>http://www.microsoft.com/video/en/us/player/embed/6fc5abb1-d943-44ec-9b53-934e9b1cca0e</td><td>deleted</td></tr>
+<tr><td>2009-10-06</td><td><a href="https://www.theworkbench.blog/2009/10/technology-corner-microsoft-office-2010.html" target="_blank">The Technology Corner - Microsoft Office 2010 and Microsoft Dynamics GP v10</a></td><td>Other</td><td>http://www.microsoft.com/video/en/us/player/embed/8c095aa2-f9f6-456c-8960-23c3174461da</td><td>deleted</td></tr>
+<tr><td>2009-10-06</td><td><a href="https://www.theworkbench.blog/2009/10/technology-corner-microsoft-office-2010.html" target="_blank">The Technology Corner - Microsoft Office 2010 and Microsoft Dynamics GP v10</a></td><td>Other</td><td>http://www.microsoft.com/video/en/us/player/embed/ebed92d3-53b0-431d-a44c-247009e45a2a</td><td>deleted</td></tr>
+<tr><td>2009-10-26</td><td><a href="https://www.theworkbench.blog/2009/10/top-ten-reasons-to-attend-microsoft.html" target="_blank">Top Ten Reasons to attend the Microsoft Dynamics GP Technical Conference 2009</a></td><td>YouTube (Flash player)</td><td>Ze4P2LoMLMU</td><td>deleted</td></tr>
+<tr><td>2009-11-11</td><td><a href="https://www.theworkbench.blog/2009/11/microsoft-dynamics-gp-technical_11.html" target="_blank">Microsoft Dynamics GP Technical Conference 2009 - Day 1</a></td><td>YouTube (Flash player)</td><td>ll7rWiY5obI</td><td>deleted</td></tr>
+<tr><td>2010-02-06</td><td><a href="https://www.theworkbench.blog/2010/02/see-you-at-microsoft-dynamics.html" target="_blank">See you at Microsoft Dynamics Convergence 2010</a></td><td>YouTube (Flash player)</td><td>9gWgaw_CXZM</td><td>private/restricted</td></tr>
+<tr><td>2010-07-16</td><td><a href="https://www.theworkbench.blog/2010/07/cookbooks.html" target="_blank">Cookbooks</a></td><td>Other</td><td>http://rcm.amazon.com/e/cm?lt1=_blank&amp;amp;bc1=000000&amp;amp;IS2=1&amp;amp;bg1=FFFFFF&amp;amp;fc1=000000&amp;amp;lc1=0000FF&amp;amp;t=polinofamilywebs&amp;amp;o=1&amp;amp;p=8&amp;amp;l=as1&amp;amp;m=amazon&amp;amp;f=ifr&amp;amp;md=10FE9736YVPPT7A0FBG2&amp;amp;asins=1849680426</td><td>unreachable</td></tr>
+<tr><td>2011-03-02</td><td><a href="https://www.theworkbench.blog/2011/03/microsoft-dynamics-gp-technical_02.html" target="_blank">Microsoft Dynamics GP Technical Conference 2011 - Day 1 Opening Session</a></td><td>YouTube (Flash player)</td><td>YG-0UDHOUCc</td><td>private/restricted</td></tr>
+<tr><td>2011-07-07</td><td><a href="https://www.theworkbench.blog/2011/07/more-microsoft-dynamics-gp-word.html" target="_blank">More Microsoft Dynamics GP Word Templates Articles</a></td><td>YouTube (Flash player)</td><td>t7u6HkAehfg</td><td>deleted</td></tr>
+<tr><td>2011-07-07</td><td><a href="https://www.theworkbench.blog/2011/07/more-microsoft-dynamics-gp-word.html" target="_blank">More Microsoft Dynamics GP Word Templates Articles</a></td><td>YouTube (Flash player)</td><td>yiUcC1yMCLQ</td><td>deleted</td></tr>
+<tr><td>2011-09-26</td><td><a href="https://www.theworkbench.blog/2011/09/jumping-on-windows-8-metro-van-wagon.html" target="_blank">Jumping on the Windows 8 Metro bandwagon</a></td><td>YouTube</td><td>1Hq95vtoS28</td><td>private/restricted</td></tr>
+<tr><td>2011-12-24</td><td><a href="https://www.theworkbench.blog/2011/12/merry-christmas-from-dynamics-gp.html" target="_blank">Merry Christmas from The Dynamics GP Blogster and Family</a></td><td>YouTube (Flash player)</td><td>EPFPVd3L3Lc</td><td>deleted</td></tr>
+<tr><td>2012-04-04</td><td><a href="https://www.theworkbench.blog/2012/04/chad-sogge-describes-features-process.html" target="_blank">Chad Sogge describes the features process for Microsoft Dynamics GP 2013</a></td><td>YouTube</td><td>TQJ0yn6g-g8</td><td>private/restricted</td></tr>
+<tr><td>2012-04-18</td><td><a href="https://www.theworkbench.blog/2012/04/kevin-racer-talks-microsoft-dynamics-gp.html" target="_blank">Kevin Racer talks Microsoft Dynamics GP 2013 Architecture</a></td><td>YouTube</td><td>lhJI1bY8nz8</td><td>private/restricted</td></tr>
+<tr><td>2012-05-01</td><td><a href="https://www.theworkbench.blog/2012/05/brian-meier-talks-microsoft-dynamics-gp.html" target="_blank">Brian Meier talks Microsoft Dynamics GP Business Analyzer</a></td><td>YouTube (Flash player)</td><td>SIGkF6XlqZI</td><td>private/restricted</td></tr>
+<tr><td>2012-05-08</td><td><a href="https://www.theworkbench.blog/2012/05/theresa-nistler-talks-microsoft.html" target="_blank">Theresa Nistler talks Microsoft Dynamics GP 2013 Features</a></td><td>YouTube (Flash player)</td><td>Sc4CUJk1WjU</td><td>private/restricted</td></tr>
+<tr><td>2012-06-09</td><td><a href="https://www.theworkbench.blog/2012/06/microsoft-west-cost-customs-67-mustang.html" target="_blank">Microsoft West Coast Customs 67 Mustang</a></td><td>YouTube (Flash player)</td><td>lKJ30tImFUQ</td><td>private/restricted</td></tr>
+<tr><td>2013-01-30</td><td><a href="https://www.theworkbench.blog/2013/01/why-i-go-to-convergence.html" target="_blank">Why I go to Convergence</a></td><td>YouTube (Flash player)</td><td>Ec1ce5KTTPI</td><td>private/restricted</td></tr>
+<tr><td>2014-02-03</td><td><a href="https://www.theworkbench.blog/2014/02/microsofts-empowering-super-bowl-2014.html" target="_blank">Microsoft&#39;s #Empowering Super Bowl 2014 ad simply nailed it!</a></td><td>YouTube (Flash player)</td><td>B9dJNh85o3Y</td><td>deleted</td></tr>
+<tr><td>2014-02-03</td><td><a href="https://www.theworkbench.blog/2014/02/microsofts-empowering-super-bowl-2014.html" target="_blank">Microsoft&#39;s #Empowering Super Bowl 2014 ad simply nailed it!</a></td><td>YouTube (Flash player)</td><td>qaOvHKG0Tio</td><td>deleted</td></tr>
+<tr><td>2014-08-21</td><td><a href="https://www.theworkbench.blog/2014/08/mariano-gomez-does-als.html" target="_blank">Mariano Gomez does the ALS #IceBucketChallenge</a></td><td>YouTube</td><td>whSoi_1b7Bw</td><td>private/restricted</td></tr>
+<tr><td>2014-10-21</td><td><a href="https://www.theworkbench.blog/2014/10/gpug-summit-2014-st-louis-day-3.html" target="_blank">GPUG Summit 2014 St. Louis - Day 3</a></td><td>YouTube</td><td>GK0MMpE0AoQ</td><td>deleted</td></tr>
+<tr><td>2014-11-17</td><td><a href="https://www.theworkbench.blog/2014/11/microsoft-reimagine-2014-conference-day.html" target="_blank">Microsoft #reIMAGINE 2014 Conference - Day 1</a></td><td>YouTube (Flash player)</td><td>Nx652L-uSK8</td><td>private/restricted</td></tr>
+<tr><td>2014-11-17</td><td><a href="https://www.theworkbench.blog/2014/11/microsoft-reimagine-2014-conference-day.html" target="_blank">Microsoft #reIMAGINE 2014 Conference - Day 1</a></td><td>YouTube (Flash player)</td><td>8F8kS2NDycs</td><td>deleted</td></tr>
+<tr><td>2014-12-23</td><td><a href="https://www.theworkbench.blog/2014/12/merry-christmas-to-entire-microsoft.html" target="_blank">Merry Christmas to the entire Microsoft Dynamics Community!</a></td><td>YouTube</td><td>AFvRf8PfpKw</td><td>deleted</td></tr>
+<tr><td>2015-01-28</td><td><a href="https://www.theworkbench.blog/2015/01/microsoft-hololens-stuff-of-science.html" target="_blank">Microsoft @HoloLens - The stuff of science fiction</a></td><td>YouTube</td><td>aThCr0PsyuA</td><td>private/restricted</td></tr>
+<tr><td>2015-01-28</td><td><a href="https://www.theworkbench.blog/2015/01/microsoft-hololens-stuff-of-science.html" target="_blank">Microsoft @HoloLens - The stuff of science fiction</a></td><td>YouTube</td><td>RCCXZ8ErVag</td><td>deleted</td></tr>
+<tr><td>2015-02-02</td><td><a href="https://www.theworkbench.blog/2015/02/microsoft-super-bowl-xlix-commercials.html" target="_blank">Microsoft Super Bowl XLIX Commercials: #Empowering </a></td><td>YouTube</td><td>wLXRt-qRBfU</td><td>private/restricted</td></tr>
+<tr><td>2015-02-02</td><td><a href="https://www.theworkbench.blog/2015/02/microsoft-super-bowl-xlix-commercials.html" target="_blank">Microsoft Super Bowl XLIX Commercials: #Empowering </a></td><td>YouTube</td><td>7cw4jmKQs0E</td><td>private/restricted</td></tr>
+<tr><td>2015-02-12</td><td><a href="https://www.theworkbench.blog/2015/02/microsoft-dynamics-gp-2015-identity.html" target="_blank">Microsoft Dynamics GP 2015 Identity Management</a></td><td>YouTube</td><td>nQG9HDR9t_s</td><td>private/restricted</td></tr>
+<tr><td>2015-02-12</td><td><a href="https://www.theworkbench.blog/2015/02/microsoft-dynamics-gp-2015-identity.html" target="_blank">Microsoft Dynamics GP 2015 Identity Management</a></td><td>YouTube</td><td>DCMfD1XUGC4</td><td>private/restricted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>gcbLmoYWMiU</td><td>private/restricted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>snEIjWR4lQw</td><td>deleted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>DBmKfkReBC4</td><td>deleted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>XVfOe5mFbAE</td><td>private/restricted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>GfWBSRibuVY</td><td>deleted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>zeTVGwe_gpQ</td><td>deleted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>4ZawV1mXlS8</td><td>private/restricted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>6Gh4o9IqeEU</td><td>private/restricted</td></tr>
+<tr><td>2015-10-06</td><td><a href="https://www.theworkbench.blog/2015/10/microsoft-windows-10-devices-briefing.html" target="_blank">Microsoft Windows 10 Devices Briefing</a></td><td>YouTube</td><td>0O1OrTcfqBI</td><td>private/restricted</td></tr>
+<tr><td>2016-06-03</td><td><a href="https://www.theworkbench.blog/2016/06/gpug-amplify-anaheim-2016-day-2.html" target="_blank">GPUG Amplify Anaheim 2016 - Day 2</a></td><td>Other</td><td>https://www.ustream.tv/embed/recorded/87323662?html5ui</td><td>deleted</td></tr>
+<tr><td>2016-06-03</td><td><a href="https://www.theworkbench.blog/2016/06/gpug-amplify-anaheim-2016-day-3.html" target="_blank">GPUG Amplify Anaheim 2016 - Day 3</a></td><td>Other</td><td>https://www.ustream.tv/embed/recorded/87353084?html5ui</td><td>deleted</td></tr>
+<tr><td>2016-06-03</td><td><a href="https://www.theworkbench.blog/2016/06/gpug-amplify-anaheim-2016-day-2.html" target="_blank">GPUG Amplify Anaheim 2016 - Day 2</a></td><td>Other</td><td>https://www.ustream.tv/embed/recorded/87324786?html5ui</td><td>deleted</td></tr>
+<tr><td>2016-09-29</td><td><a href="https://www.theworkbench.blog/2016/09/microsoft-reimagine-2016-day-1-part-1.html" target="_blank">Microsoft reIMAGINE 2016 - Day 1 (Part 1)</a></td><td>YouTube</td><td>y0mEgUSrdrc</td><td>private/restricted</td></tr>
+<tr><td>2017-07-19</td><td><a href="https://www.theworkbench.blog/2017/07/devops-series-upgrading-microsoft_19.html" target="_blank">#DevOps Series: Upgrading Microsoft Dexterity VSS and TFS repositories to Visual Studio Team Services - Part 2/2</a></td><td>YouTube</td><td>Etsay0o6R40</td><td>deleted</td></tr>
+<tr><td>2018-05-14</td><td><a href="https://www.theworkbench.blog/2018/05/gpug-amplify-south-africa-2018.html" target="_blank">GPUG Amplify South Africa 2018</a></td><td>YouTube</td><td>fXjCCMINeVQ</td><td>private/restricted</td></tr>
+<tr><td>2020-05-06</td><td><a href="https://www.theworkbench.blog/2020/05/hack4goodmbas-2020-global-hackaton.html" target="_blank">#Hack4GoodMBAS 2020 Global Hackaton</a></td><td>YouTube</td><td>QPs9lYmt6xo</td><td>private/restricted</td></tr>
+</table>
+
+<h2>Hard-dead links by domain (top 20 of 608)</h2>
+<table><tr><th>Count</th><th>Domain</th><th>What happened</th></tr><tr><td>142</td><td>mbs.microsoft.com</td><td>PartnerSource / CustomerSource — retired by Microsoft</td></tr>
+<tr><td>73</td><td>maximumglobalbusiness.com</td><td>YOUR former company site — domain no longer resolves; every file download hosted there is gone</td></tr>
+<tr><td>34</td><td>microsoft.com</td><td>Old downloads / product pages</td></tr>
+<tr><td>26</td><td>blogs.msdn.com</td><td>MSDN blogs platform retired</td></tr>
+<tr><td>21</td><td>support.microsoft.com</td><td>Retired KB article URLs</td></tr>
+<tr><td>15</td><td>skydrive.live.com</td><td>SkyDrive retired (became OneDrive)</td></tr>
+<tr><td>10</td><td>gpugsummit.com</td><td>Event site, gone</td></tr>
+<tr><td>10</td><td>twitter.com</td><td></td></tr>
+<tr><td>9</td><td>gp.rosebizincblogs.com</td><td></td></tr>
+<tr><td>7</td><td>svtiny.com</td><td></td></tr>
+<tr><td>7</td><td>windowsazure.com</td><td>Renamed to azure.microsoft.com</td></tr>
+<tr><td>7</td><td>saci.com</td><td></td></tr>
+<tr><td>7</td><td>intellpartners.com</td><td></td></tr>
+<tr><td>5</td><td>intelligentpartnerships.com</td><td></td></tr>
+<tr><td>5</td><td>dynamicsworld.co.uk</td><td></td></tr>
+<tr><td>5</td><td>dynamiccommunities.com</td><td></td></tr>
+<tr><td>5</td><td>box.net</td><td>Became box.com</td></tr>
+<tr><td>5</td><td>blogger.com</td><td></td></tr>
+<tr><td>5</td><td>msdn.microsoft.com</td><td></td></tr>
+<tr><td>4</td><td>matchboxtwenty.com</td><td></td></tr>
+</table>
+<div class="note"><strong>The one that should sting:</strong> 73 dead links point at <strong>maximumglobalbusiness.com</strong> &mdash; your former company domain, which no longer resolves. These were mostly file downloads you hosted yourself: SQL scripts, tax-update files, conference presentations. Readers hitting 18 years of "download the script here" get nothing. If those files survive in your backups, rehosting the valuable ones (GitHub repo, same as the LogTelemetry sample) and batch-updating the links is the highest-value fix in this entire report.</div>
+
+<h2>Worst posts by dead-link count</h2>
+<table><tr><th>Dead</th><th>Date</th><th>Post</th></tr><tr><td>27</td><td>2011-04-21</td><td><a href="https://www.theworkbench.blog/2011/04/microsoft-dynamics-gp-2010-r2-is-hot.html" target="_blank">Microsoft Dynamics GP 2010 R2 is hot off the press</a></td></tr>
+<tr><td>13</td><td>2009-12-30</td><td><a href="https://www.theworkbench.blog/2009/12/2010-us-payroll-tax-updates-round-1-now.html" target="_blank">2010 US Payroll Tax Updates Round 1 now available</a></td></tr>
+<tr><td>13</td><td>2008-10-24</td><td><a href="https://www.theworkbench.blog/2008/10/often-overlooked-yet-powerful-table.html" target="_blank">The often overlooked, yet powerful Table Import</a></td></tr>
+<tr><td>10</td><td>2012-03-29</td><td><a href="https://www.theworkbench.blog/2012/03/microsoft-dynamics-convergence-houston_29.html" target="_blank">Microsoft Dynamics Convergence Houston 2012 - Wrap Up!</a></td></tr>
+<tr><td>9</td><td>2012-08-10</td><td><a href="https://www.theworkbench.blog/2012/08/vote-for-your-2012-gpug-all-star.html" target="_blank">Vote for your 2012 GPUG All Star</a></td></tr>
+<tr><td>9</td><td>2013-03-25</td><td><a href="https://www.theworkbench.blog/2013/03/microsoft-convergence-new-orleans-2013_25.html" target="_blank">Microsoft Convergence New Orleans 2013: Wrap Up</a></td></tr>
+<tr><td>9</td><td>2008-10-15</td><td><a href="https://www.theworkbench.blog/2008/10/dynamics-gp-upgrade-path.html" target="_blank">Microsoft Dynamics GP upgrade path</a></td></tr>
+<tr><td>9</td><td>2012-08-06</td><td><a href="https://www.theworkbench.blog/2012/08/microsoft-dynamics-gp-2013-feature-of.html" target="_blank">Microsoft Dynamics GP 2013 &quot;Feature of the Day&quot; - Week 3 Digest</a></td></tr>
+<tr><td>8</td><td>2012-07-28</td><td><a href="https://www.theworkbench.blog/2012/07/microsoft-dynamics-gp-2013-feature-of_28.html" target="_blank">Microsoft Dynamics GP 2013 &quot;Feature of the Day&quot; - Week 2 Digest</a></td></tr>
+<tr><td>8</td><td>2012-08-13</td><td><a href="https://www.theworkbench.blog/2012/08/microsoft-dynamics-gp-2013-feature-of_13.html" target="_blank">Microsoft Dynamics GP 2013 &quot;Feature of the Day&quot; - Week 4 Digest</a></td></tr>
+</table>
+
+<h2>Recommendations (nothing done yet &mdash; your call)</h2>
+<ol>
+<li><strong>Convert the 12 alive Flash embeds to iframes</strong> (22 posts affected, ~12 convertible). Mechanical, API-scriptable, zero judgment calls. The other 16 Flash videos are dead anyway.</li>
+<li><strong>Decide on the 25+25 dead/private iframe videos.</strong> Options per video: find a replacement upload (like the Specimen Box fix), remove the embed leaving the text, or leave as-is in deep-archive posts. Judgment calls &mdash; I would triage only post-2014 posts and leave the rest.</li>
+<li><strong>The maximumglobalbusiness.com file downloads:</strong> inventory the 73 URLs against your backups; rehost what survives; the rest get an "archive: no longer available" note or stay as-is.</li>
+<li><strong>Leave the retired-Microsoft-domain long tail alone.</strong> 142 PartnerSource + 26 blogs.msdn + old KBs in decade-old posts: rewriting history is effort with no reader payoff. The archive chip already tells readers these are historical.</li>
+<li><strong>Re-check the suspicious bucket slowly</strong> (1-wide, throttled) only if you want precision; or spot-check the ~66 msdynamicsworld.com and ~24 LinkedIn links manually if you care about those.</li>
+</ol>
+<div class="ok">Raw data on disk for any follow-up: <code>linkrot-inventory.json</code> (every embed/link with its post), <code>linkrot-results.json</code> (verdicts), <code>linkrot-scan.ps1</code> (the scanner, re-runnable).</div>
+</body></html>
