@@ -4,6 +4,7 @@
 <head>
   <meta charset='utf-8'/>
   <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <meta content='jrhzvpNZeb_0wUI8eqlNrCIJiy4H1YrC9EibUydhcKg' name='google-site-verification'/>
   <b:include data='blog' name='all-head-content'/>
   <title><data:blog.pageTitle/></title>
   <link href='https://fonts.googleapis.com' rel='preconnect'/>
@@ -115,6 +116,12 @@
     white-space: nowrap;
   }
   .topbar-spacer { flex: 1; }
+  .brand-row { display: flex; align-items: center; gap: 12px; }
+  .avatar-link { flex: 0 0 auto; line-height: 0; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent); display: block; }
+  /* Blogger's default widget bundle gives every .widget 30px vertical margins;
+     inside the masthead flex row that inflates the topbar and misaligns brand vs nav */
+  .topbar .widget, .topbar .section { margin: 0 !important; padding: 0 !important; }
   .site-nav { display: flex; gap: 4px; flex-wrap: wrap; }
   .site-nav a {
     color: var(--text-soft);
@@ -331,6 +338,37 @@
   .post-body th { background: var(--card); }
   .post-body img { border-radius: 10px; }
 
+  /* Blogger caption tables (tr-caption-container) are figures, not data tables:
+     exempt them from the data-table styling and center them */
+  .post-body table.tr-caption-container {
+    display: table;
+    width: auto;
+    max-width: 100%;
+    margin: 1.2em auto;
+    border: 0;
+    font-size: inherit;
+    overflow-x: visible;
+  }
+  .post-body .tr-caption-container td {
+    border: 0;
+    padding: 0;
+    text-align: center;
+  }
+  .post-body td.tr-caption {
+    font-size: 0.85em;
+    font-style: italic;
+    opacity: 0.8;
+    padding-top: 8px;
+  }
+
+  /* media embeds: center videos, and neutralize the legacy line-break tags
+     that stack phantom blank lines around media blocks */
+  .post-body iframe { display: block; margin: 1.4em auto 0.6em; max-width: 100%; }
+  .post-body iframe + br { display: none; }
+  .post-body iframe + br + div + br { display: none; }
+  .post-body table.tr-caption-container + br { display: none; }
+  .post-body table.tr-caption-container + br + br { display: none; }
+
   /* legacy (pre-rebrand) posts carry old inline colors that assume a white
      page, so their body renders on a light panel even in dark mode */
   .post-body.legacy {
@@ -341,6 +379,9 @@
   [data-theme]:not([data-theme="light"]) .post-body.legacy,
   html:not([data-theme]) .post-body.legacy { padding: 24px 28px; }
   .post-body.legacy a { color: #0F84C2; }
+  .post-body.legacy p code, .post-body.legacy li code, .post-body.legacy div code { background: #EEF2F6; border-color: #D7E7F2; color: #10233F; }
+  .post-body.legacy pre { background: #0C1B33; border-color: #223D63; color: #DCE7F5; }
+  .post-body.legacy pre code { background: transparent; color: inherit; }
 
   .post-labels { display: flex; gap: 8px; flex-wrap: wrap; padding: 20px 0 0; }
 
@@ -373,6 +414,14 @@
   .site-footer a { color: var(--text-soft); }
   .site-footer a:hover { color: var(--accent); }
   .footer-heritage { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+  .footer-id { display: flex; align-items: center; gap: 14px; }
+  .mct-badge { width: 78px; height: 78px; display: block; }
+  .mct-link { flex: 0 0 auto; line-height: 0; margin: -11px; }
+  .footer-lines { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+  .mvp-badge { width: 56px; height: 56px; border-radius: 50%; flex: 0 0 auto; cursor: zoom-in; }
+  .mvp-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(2, 8, 20, 0.72); z-index: 100; cursor: zoom-out; }
+  .mvp-modal.show { display: flex; }
+  .mvp-modal img { width: 300px; height: 300px; max-width: 84vw; max-height: 84vw; border-radius: 50%; box-shadow: 0 18px 60px rgba(2, 8, 20, 0.6); }
 
   /* ---------- status / empty ---------- */
   .status-msg { padding: 48px 0; color: var(--muted); }
@@ -411,10 +460,10 @@
             <b:widget-setting name='displayWidth'>0</b:widget-setting>
           </b:widget-settings>
           <b:includable id='main'>
-            <div class='brand'>
+            <div class='brand-row'><a class='avatar-link' expr:href='data:blog.homepageUrl'><img alt='Mariano Gomez Bent' class='avatar' height='44' src='https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/images/avatar-96.png' srcset='https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/images/avatar-192.png 2x' width='44'/></a><div class='brand'>
               <a class='site-title' expr:href='data:blog.homepageUrl'><span class='tick'>//</span> <data:title/></a>
               <p class='byline'>by Mariano Gomez, Former Microsoft MVP (2008-2024)</p>
-            </div>
+            </div></div>
           </b:includable>
           <b:includable id='behindImageStyle'>
     <b:if cond='data:sourceUrl'>
@@ -453,7 +502,7 @@
       <b:section class='nav-section' id='nav' name='Navigation' showaddelement='yes'>
         <b:widget id='PageList1' locked='true' title='Pages' type='PageList' version='2' visible='true'>
           <b:widget-settings>
-            <b:widget-setting name='pageListJson'><![CDATA[{"1122985866584111547":{"href":"https://dynamicsgpblogster.blogspot.com/p/sql-scripts.html","position":2,"title":"SQL Scripts"},"link0":{"href":"http://dynamicsgpblogster.blogspot.com/","position":0,"title":"Home"},"8048261959969019525":{"href":"https://dynamicsgpblogster.blogspot.com/p/code.html","position":3,"title":"Modifier with VBA"},"8503991011958176349":{"href":"https://dynamicsgpblogster.blogspot.com/p/resources.html","position":1,"title":"Learning Resources"}}]]></b:widget-setting>
+            <b:widget-setting name='pageListJson'><![CDATA[{"link0":{"href":"http://dynamicsgpblogster.blogspot.com/","position":0,"title":"Home"}}]]></b:widget-setting>
             <b:widget-setting name='homeTitle'>Home</b:widget-setting>
           </b:widget-settings>
           <b:includable id='main'>
@@ -623,7 +672,7 @@
               </header>
 
               <div class='archive-note' id='archiveNote'>
-                <strong>From the archive.</strong> This post dates from the blog&#8217;s Dynamics GP and early Power Platform era. Products and screenshots may have changed since it was written.
+                <strong>From the archive.</strong> This post dates from the blog&#8217;s Dynamics GP and early Power Platform era. Products and screenshots may have changed since it was written, and some of its links (PartnerSource and CustomerSource pages, legacy Maximum Global Business downloads, and other retired sites among them) may have been archived or may no longer be available.
               </div>
 
               <div class='post-body' id='postBody'>
@@ -1068,13 +1117,30 @@
   <!-- ============ footer ============ -->
   <footer class='site-footer'>
     <div class='wrap'>
-      <div>
-        <data:blog.title/>, by Mariano Gomez, Former Microsoft MVP (2008-2024).
-        <a href='https://youtube.com/user/mgomezb1' rel='noopener' target='_blank'>YouTube</a>
+      <div class='footer-id'>
+        <img alt='Microsoft MVP Alumni' class='mvp-badge' height='56' src='https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/images/mvp-alumni-112.png' srcset='https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/images/mvp-alumni-224.png 2x' width='56'/>
+        <a class='mct-link' href='https://www.credly.com/badges/c79746ef-271f-4d3b-a48c-fb742fcc7d88' rel='noopener' target='_blank' title='Microsoft Certified Trainer 2026 - verify on Credly'><img alt='Microsoft Certified Trainer 2026' class='mct-badge' height='78' src='https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/images/mct-2026-112.png' srcset='https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/images/mct-2026-224.png 2x' width='78'/></a>
+        <div class='footer-lines'>
+          <a href='https://www.youtube.com/@workbench-blog' rel='noopener' target='_blank'>YouTube</a> &#183; <a href='https://www.linkedin.com/in/marianogomezbent/' rel='noopener' target='_blank'>LinkedIn</a>
+        </div>
       </div>
       <div class='footer-heritage'>est. 2008 as The Dynamics GP Blogster</div>
     </div>
   </footer>
+
+  <div class='mvp-modal' id='mvpModal'><img alt='Microsoft MVP Alumni' height='300' src='https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/images/mvp-alumni-474.png' width='300'/></div>
+  <script>
+  //<![CDATA[
+  (function () {
+    var b = document.querySelector('.mvp-badge');
+    var m = document.getElementById('mvpModal');
+    if (!b || !m) { return; }
+    b.addEventListener('click', function () { m.classList.add('show'); });
+    m.addEventListener('click', function () { m.classList.remove('show'); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { m.classList.remove('show'); } });
+  })();
+  //]]>
+  </script>
 
   <script>
   //<![CDATA[
@@ -1123,7 +1189,9 @@
   //]]>
   </script>
 
-<script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'/>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js'/>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js'/>
   <script>
   //<![CDATA[
   if (window.hljs) { document.querySelectorAll('.post-body pre code').forEach(function (b) { hljs.highlightElement(b); }); }
