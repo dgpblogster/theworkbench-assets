@@ -1,0 +1,139 @@
+<div class="separator" style="text-align: center;"><img alt="Power Automate cloud flow telemetry in Azure Application Insights, down to the action level" height="630" src="https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/covers/cover-06-appinsights.png" style="height: auto; max-width: 100%;" width="1200" /></div>
+<p>Longtime readers may remember that the very last article I published before this blog went quiet, back in August of 2021, covered monitoring <a href="https://www.theworkbench.blog/2021/08/power-apps-application-monitoring-with.html" target="_blank">Power Apps with Azure Application Insights</a>. So it is only fitting that I return to the subject from the other side of the platform: getting cloud flow telemetry out of Power Automate and into Application Insights, down to the action level.</p>
+
+<p>I will be honest about why I am writing this one. When I went looking for how this integration works, the picture I pieced together from searching around was incomplete, and once I configured it and read the actual tables, I understood why: the feature is admin-gated where makers cannot see it, and the telemetry schema is not what instinct suggests. I made the wrong assumption myself before the data corrected me! So, in this article I will walk through how the integration actually works, the schema surprise that changes how you query it, and the <a href="https://learn.microsoft.com/en-us/kusto/?view=microsoft-fabric" target="_blank">Kusto queries</a> that turn "the flow failed" into "the flow failed at this action, with this error."</p>
+
+<h2>First things first: yes, the integration exists</h2>
+
+<p>Power Automate cloud flow telemetry can be exported to Azure Application Insights, and keep in mind, this is not a maker feature -- which is the source of a lot of the confusion. Canvas apps let a maker paste an instrumentation key into the app and start calling <i><b>Trace()</b></i>. Cloud flows offer nothing of the sort, and for a sound reason: flows have no client runtime to instrument. They execute server-side on shared infrastructure, so the integration was built as a platform-level export instead.</p>
+
+<p>The setup lives in the <strong>Power Platform admin center</strong>, under <strong>Data export</strong>. <br /><br /></p><div class="separator" style="text-align: center;"><a href="https://blogger.googleusercontent.com/img/a/AVvXsEii9WQxdgAykdSYgUhfp2ZM_5SH0AR4ddRhmq3AdVEnuxRxRlbp9oJVxUvKTVM1T4JTtfV_G2Zz6hjs0Xvki3N9MBzXBRDhWO0hF-h6UHy2mwad_USZ4lOHy5GxSmjzdEnAr6EpxjAs44_gt7Q_GcU-hBpmnLZ1qiAr5K4c6AG8UQJxu4UVqnKaaHawNPaE"><img alt="" data-original-height="818" data-original-width="1622" height="291" src="https://blogger.googleusercontent.com/img/a/AVvXsEii9WQxdgAykdSYgUhfp2ZM_5SH0AR4ddRhmq3AdVEnuxRxRlbp9oJVxUvKTVM1T4JTtfV_G2Zz6hjs0Xvki3N9MBzXBRDhWO0hF-h6UHy2mwad_USZ4lOHy5GxSmjzdEnAr6EpxjAs44_gt7Q_GcU-hBpmnLZ1qiAr5K4c6AG8UQJxu4UVqnKaaHawNPaE=w576-h291" width="576" /></a></div>
+<div style="text-align: center; font-size: 0.9em; margin: 0.4em 0 1.4em;"><em>Admin Center &gt; Manage &gt; Data Export</em></div><br />An administrator creates an export package, selects Power Automate as the data type, chooses the environment, and points it at an Application Insights resource. Three requirements to check before you start, because each one can stop you cold:<p></p>
+
+<ol>
+<li><strong>The environment must be a Managed Environment.</strong> The feature is gated behind this governance tier, which is exactly why a maker who goes looking for it at the flow level concludes it does not exist. It does; it just lives upstairs.</li>
+<li><strong>You need admin rights, not maker rights.</strong> Power Platform administrator or Dynamics 365 administrator at the tenant level, plus environment or system administrator in the Dataverse environment.</li>
+<li><strong>You need Contributor rights or better on the Application Insights resource</strong> itself, over on the Azure side.</li>
+</ol>
+
+<p><strong>NOTE:</strong> once configured, expect up to 24 hours before telemetry starts appearing. Initial patience is required; ongoing latency is much lower. Do not spend that first afternoon rewriting your export package because the tables look empty!</p>
+
+<h2>The schema surprise: two tables, not one</h2>
+
+<p>Here is the assumption I walked in with: every action a flow executes, including the trigger, lands as an entry in the Application Insights <code>requests</code> table. It seems reasonable. It is also not how the schema works, and the difference matters more than any other detail in this article. As it turns out, the export splits telemetry across two tables:</p>
+
+<table>
+<tbody><tr><th>Table</th><th>Contains</th><th>signalCategory value</th></tr>
+<tr><td><code>requests</code></td><td>Cloud flow runs</td><td>"Cloud flow runs"</td></tr>
+<tr><td><code>dependencies</code></td><td>Cloud flow triggers and actions</td><td>"Cloud flow triggers" / "Cloud flow actions"</td></tr>
+</tbody></table>
+
+<p>In turn, if your monitoring queries only touch <code>requests</code>, you are monitoring at the run level. You will know a flow failed. You will not know which action failed, how long each action took, or whether a specific connector call is degrading over time. All of that lives in <code>dependencies</code>, waiting to be queried.</p>
+
+<p>There is a second, related detail that took me a moment to appreciate. When you configure the export package, you explicitly choose whether to export cloud flow runs, triggers, or actions. These are separate checkboxes! If you only selected runs during setup, action telemetry never leaves the platform, and no Kusto query will conjure it afterward. Granularity is decided at configuration time, not query time.</p>
+
+<h2>Run-level monitoring: the baseline</h2>
+
+<p>Run-level failure alerting is the right starting point, and the query looks as follows:</p>
+
+<pre><code class="language-sql">requests
+| where customDimensions.signalCategory == "Cloud flow runs"
+| where success == false
+| extend flowId = tostring(customDimensions["resourceId"]),
+         environmentId = tostring(customDimensions["environmentId"])
+| project timestamp, name, resultCode, duration, flowId, environmentId, operation_Id</code></pre>
+
+<p>A few things to note here. Filtering on <code>signalCategory</code> matters because your Application Insights instance may be collecting telemetry from many sources, and this keeps the flow signals separated from everything else. Filtering on <code>environmentId</code> matters when multiple environments export to the same resource. Wire this query to an Azure Monitor alert rule, and you have real-time failure notifications by email, SMS, or webhook.</p>
+
+<h2>Action-level monitoring: where the real value is</h2>
+
+<p>Now, with the actions checkbox enabled in your export package, the <code>dependencies</code> table gives you per-action telemetry:</p>
+
+<pre><code class="language-sql">dependencies
+| where customDimensions.signalCategory == "Cloud flow actions"
+| where success == false
+| extend flowId = tostring(customDimensions["resourceId"])
+| project timestamp, name, resultCode, duration, flowId, operation_Id</code></pre>
+
+<p>The <code>name</code> field carries the action name exactly as it appears in the flow designer. This is the query that turns "the invoice approval flow failed" into "the invoice approval flow failed at the vendor validation HTTP call with a 429."</p>
+
+<p>Correlation is what makes the two tables work together. The <code>operation_Id</code> on an action's dependency row matches the <code>operation_Id</code> on the parent run's request row, so you can join them:</p>
+
+<pre><code class="language-sql">requests
+| where customDimensions.signalCategory == "Cloud flow runs"
+| where success == false
+| join kind=inner (
+    dependencies
+    | where customDimensions.signalCategory == "Cloud flow actions"
+    | where success == false
+  ) on operation_Id
+| project runTime = timestamp, flowRun = name,
+          failedAction = name1, actionResult = resultCode1, actionDuration = duration1</code></pre>
+
+<p>What this join produces is a failure report at the granularity your support team actually needs: which run, which action, what error, and how long it ran before dying. The <code>name1</code>, <code>resultCode1</code>, and <code>duration1</code> columns are Kusto's automatic renames for the joined table's fields; the projection gives them names a human can read.</p>
+
+<p>Beyond failures, the same table supports performance work. Percentile queries over <code>duration</code> by action <code>name</code> will surface connector calls that are slowly degrading long before they start timing out, which is exactly the kind of early signal run-level monitoring can never provide.</p>
+
+<h2>Three caveats before you turn everything on</h2>
+
+<p><strong>NOTE 1:</strong> ingestion cost scales with granularity. Application Insights bills per GB ingested, and action-level export on a busy flow with Apply to each loops generates a row per action, per iteration, per run. A flow processing a few thousand records nightly can produce telemetry volume that surprises you at invoice time. Scope the export deliberately: enable action-level export for the flows that justify it rather than blanketing the environment.</p>
+
+<p><strong>NOTE 2:</strong> validate scope nesting behavior empirically. If your flows use the Try/Catch pattern built on Scope containers, test how nested actions surface before you write production alert queries. Build a flow with a deliberately failing action inside a scope, run it, and inspect what lands in <code>dependencies</code>. Ten minutes with a test flow will teach you more than any amount of reading, and your failure queries should be written against observed behavior rather than assumptions. I know so as I've done so myself!</p>
+
+<p><strong>NOTE 3:</strong> treat the export as telemetry, not as a system of record. Microsoft is explicit that small data losses can occur due to transient service issues. The flow run history inside the Power Automate portal remains the transactional, authoritative record. Application Insights is for alerting, dashboards, and trend analysis, not for audit-grade completeness.</p>
+
+<h2>What about custom telemetry from inside a flow?</h2>
+
+<p>The export covers runs, triggers, and actions, but you may be asking, "where is the Trace() function for flows?" Very simple: there is no native equivalent. If you need business-level events -- "vendor matched," "payment batch released" -- the pattern is an HTTP action posting directly to the Application Insights ingestion endpoint at <code>https://dc.services.visualstudio.com/v2/track</code>, or preferably the regional endpoint from your resource's connection string. No authentication header is required; the instrumentation key inside the payload identifies the target resource:</p>
+
+<pre><code class="language-json">{
+  "name": "Microsoft.ApplicationInsights.Event",
+  "time": "@{utcNow()}",
+  "iKey": "&lt;your-instrumentation-key&gt;",
+  "data": {
+    "baseType": "EventData",
+    "baseData": {
+      "name": "InvoiceApprovalFlow.Step3.VendorMatched",
+      "properties": {
+        "flowRunId": "@{workflow()['run']['name']}",
+        "flowName": "@{workflow()['name']}",
+        "environment": "@{workflow()['tags']['environmentName']}",
+        "vendorId": "@{variables('vendorId')}"
+      },
+      "measurements": {
+        "recordsProcessed": 42,
+        "durationMs": 1830
+      }
+    }
+  }
+}</code></pre>
+
+<p>A few things to note about this payload. Events posted this way land in the <code>customEvents</code> table. Swap <code>baseType</code> to <code>TraceData</code> with a <code>message</code> and <code>severityLevel</code> for trace-style logging, or to <code>ExceptionData</code> for structured errors. And carrying the flow run ID in the properties gives you a correlation key back to the platform-exported tables, so your business events join cleanly against the runs and actions they belong to.</p>
+
+<h3>Centralize it in a child flow</h3>
+
+<p>Do not scatter this HTTP action across every flow you own! Build it once as a child flow -- call it something like "LogTelemetry" -- and have every parent flow call it as a single action. The child flow takes three inputs:</p>
+
+<ul>
+<li><strong>Event name</strong> (text): the dotted event identifier, such as <code>InvoiceApprovalFlow.Step3.VendorMatched</code></li>
+<li><strong>Properties</strong> (text): a JSON string of custom dimensions, parsed and merged into the payload inside the child</li>
+<li><strong>Severity</strong> (text or number): drives whether the child posts EventData, TraceData, or ExceptionData</li>
+</ul>
+
+<p>In turn, the child flow owns the instrumentation key, the endpoint URL, and the payload envelope. When the ingestion endpoint changes, when you rotate the key, or when you decide to enrich every event with the environment name, you change one flow instead of forty. Parent flows stay clean: one "Run a child flow" action per telemetry point, and no HTTP plumbing in sight.</p>
+
+<p>The same child flow pairs naturally with Scope-based error handling. Wrap your business logic in a Try scope, follow it with a Catch scope configured to run after "has failed" and "has timed out," and inside the Catch use <code>result('Try')</code> to extract the failed action details and pass them to LogTelemetry as an ExceptionData payload. That gives you structured failure telemetry carrying the actual action error, not just a run that shows red in the portal.</p>
+
+<p><strong>NOTE:</strong> two constraints to know before you commit to this pattern. The HTTP connector requires premium licensing, and the raw post does not work if your Application Insights resource enforces Entra ID-only ingestion. In that case, a small Azure Function relay running the real SDK is the better shape, since a flow cannot easily perform the token acquisition against Azure Monitor scopes.</p>
+
+<p>And to save you the scaffolding: I built LogTelemetry exactly as described and published it as an importable solution on GitHub, over at <a href="https://github.com/dgpblogster/power-automate-logtelemetry">github.com/dgpblogster/power-automate-logtelemetry</a>. It uses no connectors that require authentication, so the import prompts for nothing; you replace two clearly-marked CONFIG values, turn it on, and start logging. The README walks the import click by click.</p>
+
+<h2>The bottom line</h2>
+
+<p>Power Automate telemetry in Application Insights is real, admin-configured, and gated behind Managed Environments. Runs live in <code>requests</code>; triggers and actions live in <code>dependencies</code>. If your monitoring stops at the <code>requests</code> table, you have built a smoke detector that tells you the building is on fire without telling you which room. The <code>dependencies</code> table, an export package with the actions checkbox enabled, and one join on <code>operation_Id</code> are all it takes to do better.</p>
+
+<p>If you have wired up this export yourself, or found other signals hiding in these tables worth querying, please drop a note in the comments describing your experience; telemetry patterns get better every time somebody shares what they found in the data.</p>
+
+<p>Until next post!</p>
+
+<p>MG.-<br />Mariano Gomez Bent<br />Former Microsoft BizApps MVP</p>
