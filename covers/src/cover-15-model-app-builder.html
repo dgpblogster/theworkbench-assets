@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1200px; height:630px; overflow:hidden; }
+  body {
+    background:
+      radial-gradient(ellipse at 85% 15%, rgba(26,160,230,.12), transparent 55%),
+      linear-gradient(135deg, #0C1B33 0%, #10233F 60%, #0C1B33 100%);
+    font-family:'Inter','Segoe UI',sans-serif;
+    color:#E8EEF6;
+    position:relative;
+  }
+  .grid {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(26,160,230,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,160,230,.05) 1px, transparent 1px);
+    background-size:48px 48px;
+  }
+  .frame { position:absolute; inset:0; padding:54px 64px; display:flex; flex-direction:column; }
+  .brand { font-family:'JetBrains Mono',Consolas,monospace; font-size:22px; color:#8FA3BC; letter-spacing:.04em; }
+  .brand .tick { color:#1AA0E6; font-weight:600; }
+  .brand b { color:#E8EEF6; font-weight:600; }
+  .mid { flex:1; display:flex; align-items:center; gap:44px; }
+  .text { width:560px; }
+  .kicker { font-family:'JetBrains Mono',Consolas,monospace; font-size:19px; letter-spacing:.16em; color:#1AA0E6; margin-bottom:22px; }
+  h1 { font-size:60px; font-weight:800; letter-spacing:-0.025em; line-height:1.06; margin-bottom:20px; }
+  .sub { font-size:28px; color:#B9C7DA; font-weight:500; letter-spacing:-0.01em; }
+  .sub em { color:#6CC6F2; font-style:normal; }
+  .diagram { flex:1; display:flex; flex-direction:column; gap:22px; }
+  .arch { background:rgba(27,53,87,.55); border:1px solid #274672; border-radius:14px; padding:18px 20px 20px; }
+  .arch.win { border-color:rgba(26,160,230,.65); box-shadow:0 0 34px rgba(26,160,230,.14); }
+  .arch-label { font-family:'JetBrains Mono',Consolas,monospace; font-size:14px; letter-spacing:.12em; color:#8FA3BC; margin-bottom:13px; }
+  .arch.win .arch-label { color:#6CC6F2; }
+  .row { display:flex; align-items:center; gap:0; }
+  .node {
+    font-family:'JetBrains Mono',Consolas,monospace; font-size:14px; font-weight:600;
+    background:#10233F; border:1px solid #3B5A85; border-radius:8px;
+    padding:9px 12px; color:#E8EEF6; white-space:nowrap;
+  }
+  .node.src { border-color:#274672; color:#B9C7DA; font-weight:400; }
+  .node.mcp { border-color:#1AA0E6; color:#6CC6F2; }
+  .wire { height:2px; background:#3B5A85; flex:1; min-width:18px; }
+  .wire.lit { background:#1AA0E6; }
+  .wire.dead { background:repeating-linear-gradient(90deg,#3B5A85 0 6px,transparent 6px 12px); }
+  .gate {
+    font-family:'JetBrains Mono',Consolas,monospace; font-size:13px; font-weight:600;
+    color:#0C1B33; background:#6CC6F2; border-radius:8px; padding:9px 12px; white-space:nowrap;
+  }
+  .note { font-family:'JetBrains Mono',Consolas,monospace; font-size:12px; color:#8FA3BC; margin-top:11px; }
+  .foot { display:flex; justify-content:space-between; align-items:flex-end; }
+  .byline { font-family:'JetBrains Mono',Consolas,monospace; font-size:18px; color:#8FA3BC; }
+  .byline .at { color:#1AA0E6; }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="frame">
+  <div class="brand"><span class="tick">//</span> <b>The Workbench</b></div>
+
+  <div class="mid">
+    <div class="text">
+      <div class="kicker">// POWER APPS &nbsp;MODEL APP BUILDER</div>
+      <h1>Describe the App,<br/>Approve the Plan</h1>
+      <div class="sub">The dry run is <em>the whole feature</em></div>
+    </div>
+
+    <div class="diagram">
+      <div class="arch">
+        <div class="arch-label">PLAN &nbsp;NOTHING IS WRITTEN YET</div>
+        <div class="row">
+          <div class="node src">PROMPT</div>
+          <div class="wire"></div>
+          <div class="node mcp">APP SPEC</div>
+          <div class="wire dead"></div>
+          <div class="node mcp">BUILD PLAN</div>
+        </div>
+        <div class="note">personas &middot; tables &middot; forms &middot; views &middot; roles</div>
+      </div>
+      <div class="arch win">
+        <div class="arch-label">BUILD &nbsp;ONLY AFTER YOU APPROVE</div>
+        <div class="row">
+          <div class="gate">APPROVE</div>
+          <div class="wire lit"></div>
+          <div class="node">DATAVERSE</div>
+          <div class="wire lit"></div>
+          <div class="node">MODEL APP</div>
+        </div>
+        <div class="note">then: verify deployed app against the spec</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="byline">Mariano Gomez Bent</div>
+    <div class="byline"><span class="at">www.</span>theworkbench.blog</div>
+  </div>
+</div>
+</body>
+</html>
