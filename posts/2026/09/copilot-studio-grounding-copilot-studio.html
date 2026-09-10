@@ -1,0 +1,118 @@
+<!-- Cover image is hosted in the public theworkbench-assets repo. If you prefer Google-hosted
+     images, re-upload the PNG through the Blogger editor before you publish. -->
+<div style="text-align:center;">
+<img alt="Grounding on Azure SQL: your schema is now the prompt" src="https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/covers/cover-11-azuresql-knowledge.png" style="max-width:100%;" />
+</div>
+
+<p>Every Monday I read what moved in the Microsoft Learn documentation over the previous week, mostly because I got tired of finding out about a capability three months late, when a customer asks why we are not already using it. Most weeks the honest answer is "nothing worth your time". The week of August 13th was not one of those weeks.</p>
+
+<p>A new article appeared in the Copilot Studio documentation, and it changes the answer to a question I have been asked more times than I can count: <i>can my agent answer questions straight out of my database?</i></p>
+
+<p>Now it can.</p>
+
+<p><b>Background</b></p>
+
+<p>Until now, grounding a Copilot Studio agent meant pointing it at content that was, broadly speaking, prose: SharePoint documents, websites, uploaded files, Dataverse tables. If your answer lived in a relational database in Azure, you either built a tool that queried it and shaped the result yourself, or you exported the data somewhere the agent could already read. Both work. Neither is what you would call delightful.</p>
+
+<p>The new article is <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/knowledge-add-azure-sql-tables">Add Azure SQL tables as a knowledge source</a>. In its own words, you ground your agent in the structured data stored in your Azure SQL database, and the agent answers by reading from the tables you select.</p>
+
+<p>Select the tables. That is the whole configuration story. No tool authoring, no schema mapping, no intermediate copy of the data.</p>
+
+<p><b>The part everybody will skip, and shouldn't</b></p>
+
+<p>There is a security model here, and it is not the one most people will assume. Azure SQL knowledge uses the Power Platform SQL connection you create during setup, and then:</p>
+
+<blockquote>Users only receive answers based on data the maker can access through the maker's configured connection and database permissions.</blockquote>
+
+<p>Read that again. The ceiling is <b>the maker's</b> connection, not the end user's own database rights. If you wire up a connection that can read the whole Sales schema, then every user who can talk to that agent can get answers derived from the whole Sales schema. The agent is not brokering each user's individual SQL permissions row by row.</p>
+
+<p>That is not a defect, it is how connection-based grounding works everywhere in Power Platform. But it does mean table selection is a <i>security</i> decision, not just a relevance one, and I would even venture to say it is the sentence in that article most likely to be skimmed past and later regretted. Select the tables the agent needs. Not the tables you happen to have.</p>
+
+<p><b>What it means for you</b></p>
+
+<p>If you are a maker, a whole category of question moves from "that needs a developer" to "that needs a good description". Order status, purchase history, revenue by customer or date: ground an agent on it in an afternoon. The catch is that quality now depends on your schema. The documentation asks for clear column names over cryptic abbreviations (<code>CustomerName</code>, not <code>CustNm</code>), primary keys on every table, and descriptive names such as <code>OrderDate</code> rather than <code>Date1</code>. It also warns that extra tables dilute grounding. So, your schema quality is now prompt quality, and every badly named column you inherited is now, quite literally, a worse answer.</p>
+
+<p>If you are a professional developer, three things matter. The primary key requirement is not decorative: the agent uses primary keys to identify rows and return results, so heap tables will behave poorly. Network reachability is on you, and the prerequisites offer firewall rules allowing Azure services or private connectivity, the first of which will not survive most security reviews, so budget for that conversation early. And best of all, the documentation hands you a testability seam: create a diagnostic view returning a small, known dataset and confirm the connection before you point at production. That turns "the agent gave a weird answer" into something you can bisect in ten seconds.</p>
+
+<p>NOTE: the documentation hedges its own UI labels, saying you pick <b>Azure SQL</b> <i>or</i> <b>SQL Server</b> "depending on the label shown in your environment". I am reproducing that hedge rather than guessing.</p>
+
+<p><b>A demo worth building</b></p>
+
+<p>Something small and controlled: a three-table order schema, a diagnostic view with a known answer, and an agent grounded on exactly those tables, so you can change one thing at a time and watch what it does to answer quality. Here is the schema, written the way the documentation asks:</p>
+
+<pre><code class="language-sql">CREATE TABLE dbo.Customers (
+    CustomerId   INT           NOT NULL IDENTITY(1,1),
+    CustomerName NVARCHAR(200) NOT NULL,
+    CustomerCity NVARCHAR(100) NULL,
+    CONSTRAINT PK_Customers PRIMARY KEY CLUSTERED (CustomerId)
+);
+
+CREATE TABLE dbo.Orders (
+    OrderId     INT           NOT NULL IDENTITY(1,1),
+    CustomerId  INT           NOT NULL,
+    OrderDate   DATE          NOT NULL,
+    OrderStatus NVARCHAR(40)  NOT NULL,
+    OrderTotal  DECIMAL(18,2) NOT NULL,
+    CONSTRAINT PK_Orders PRIMARY KEY CLUSTERED (OrderId),
+    CONSTRAINT FK_Orders_Customers FOREIGN KEY (CustomerId)
+        REFERENCES dbo.Customers (CustomerId)
+);
+
+CREATE VIEW dbo.AgentGroundingCheck
+AS
+SELECT 'GROUNDING-OK' AS DiagnosticMarker, 42 AS DiagnosticNumber;
+</code></pre>
+
+<p>A few things to note. Every table carries an explicit primary key, because that is what the agent uses to identify rows. Every column name is a phrase a human would say out loud, and you should resist the urge to shorten them. The view at the bottom is the diagnostic seam: add it to the knowledge source, ask "what is the diagnostic marker?", and you learn whether the connection works at all, independent of whether your business data is right. Pick your own marker value, and drop the view from the knowledge source before real users arrive, because it is scaffolding, not a feature.</p>
+
+<p>Now the description, which is not code but is configuration, and which the documentation treats as the highest-leverage text you will write:</p>
+
+<pre><code class="language-text">Azure SQL knowledge for Contoso order management. Includes Customers,
+Orders, and OrderLines tables. Use this source for questions about order
+status, order history, customer purchases, and revenue by customer or
+date. Don't use for inventory on-hand or shipping carrier tracking.
+</code></pre>
+
+<p>This is lifted from the article's own example, and the shape is what matters: domain, tables, what to use it for, and then what <b>not</b> to use it for. That last sentence does real work, because generative orchestration is choosing between your knowledge sources, and an exclusion is often a stronger signal than an inclusion.</p>
+
+<p><b>The steps</b></p>
+
+<p>As the documentation gives them. Where it hedges on a label, I hedge too.</p>
+
+<p>1) Prepare the database: primary keys defined, readable column names, and your Azure SQL server reachable from Power Platform.</p>
+
+<p>2) Open your agent and select the <b>Build</b> tab.</p>
+
+<p>3) In the components panel, select <b>Knowledge</b>.</p>
+
+<p>4) In the <b>Add knowledge</b> dialog, select <b>Azure SQL</b> (the tile may read <b>SQL Server</b> in your environment).</p>
+
+<p>5) Select <b>Create new connection</b> (shown as <b>Add connection</b> in places), enter the server and database names, choose your authentication type, and sign in. If a connection already exists, select it and continue.</p>
+
+<p>6) Search for and select the tables the agent should use. This is the security decision from earlier, so be deliberate.</p>
+
+<p>7) Review the knowledge name and write the detailed description properly.</p>
+
+<p>8) Select <b>Add to agent</b>, then confirm it appears on the agent's <b>Knowledge</b> page.</p>
+
+<p>9) <b>Publish the agent.</b> The knowledge source is not available in the published experience until you do, and this is exactly the step that gets skipped and then generates a bug report.</p>
+
+<p>10) Test with something that must come from those tables. The article's own example: "Show me the top five customers by total sales last month."</p>
+
+<p><b>Companion repo sketch</b></p>
+
+<p>Four folders is plenty: <code>sql/</code> with schema, seed, diagnostic view and teardown; <code>agent/</code> holding the knowledge description as its own version-controlled file, because it is configuration that changes behavior and deserves a diff history; a <code>test-questions.md</code> with three columns, the question, the expected answer, and the table the answer must come from; and <code>docs/</code> for the network and security notes. Use fixed dates in the seed data, never dates relative to today, or "last month" will mean something different in March than in September and your tests will rot. That third column in the test file is the piece people leave out, and without it you cannot tell a grounding failure from a data failure.</p>
+
+<p><b>Final Notes</b></p>
+
+<p>This lands exactly where agents have been weakest: answering from the boring, structured, authoritative data that businesses actually run on. Slick.</p>
+
+<p>One caution, the same one: the maker's connection defines what every user of that agent can reach. And since the article is four days old as I write this, labels may still be moving, so trust your screen over my transcription and go read <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/knowledge-add-azure-sql-tables">the source</a>.</p>
+
+<p>What I learned from this exercise: the schema you were going to clean up "someday" is now on the critical path to answer quality, and that's always a good thing, because it finally gives you a business reason to do it.</p>
+
+<p>Until next post!</p>
+
+<p>MG.-<br/>
+Mariano Gomez Bent<br/>
+Former Microsoft BizApps MVP</p>
