@@ -60,6 +60,18 @@ CREATE TABLE dbo.Orders (
         REFERENCES dbo.Customers (CustomerId)
 );
 
+CREATE TABLE dbo.OrderLines (
+    OrderLineId INT           NOT NULL IDENTITY(1,1),
+    OrderId     INT           NOT NULL,
+    ProductName NVARCHAR(200) NOT NULL,
+    Quantity    INT           NOT NULL,
+    UnitPrice   DECIMAL(18,2) NOT NULL,
+    LineTotal   DECIMAL(18,2) NOT NULL,
+    CONSTRAINT PK_OrderLines PRIMARY KEY CLUSTERED (OrderLineId),
+    CONSTRAINT FK_OrderLines_Orders FOREIGN KEY (OrderId)
+        REFERENCES dbo.Orders (OrderId)
+);
+
 CREATE VIEW dbo.AgentGroundingCheck
 AS
 SELECT 'GROUNDING-OK' AS DiagnosticMarker, 42 AS DiagnosticNumber;
@@ -79,29 +91,19 @@ date. Don't use for inventory on-hand or shipping carrier tracking.
 
 <p><b>The steps</b></p>
 
-<p>As the documentation gives them. Where it hedges on a label, I hedge too.</p>
+<p>The full click path is in <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/knowledge-add-azure-sql-tables">the source</a>, and given the label hedge above I would rather you read it there than trust my transcription. These are the steps that carry a decision:</p>
 
-<p>1) Prepare the database: primary keys defined, readable column names, and your Azure SQL server reachable from Power Platform.</p>
+<p>1) <b>Prepare the database.</b> Primary keys defined, readable column names, and your Azure SQL server reachable from Power Platform.</p>
 
-<p>2) Open your agent and select the <b>Build</b> tab.</p>
+<p>2) <b>Select the tables deliberately.</b> This is the security decision from earlier, not a relevance one.</p>
 
-<p>3) In the components panel, select <b>Knowledge</b>.</p>
+<p>3) <b>Write the description properly</b>, in the shape above.</p>
 
-<p>4) In the <b>Add knowledge</b> dialog, select <b>Azure SQL</b> (the tile may read <b>SQL Server</b> in your environment).</p>
+<p>4) <b>Publish the agent.</b> The knowledge source is not available in the published experience until you do, and this is exactly the step that gets skipped and then generates a bug report.</p>
 
-<p>5) Select <b>Create new connection</b> (shown as <b>Add connection</b> in places), enter the server and database names, choose your authentication type, and sign in. If a connection already exists, select it and continue.</p>
+<p>5) <b>Test with something that must come from those tables.</b> The article's own example: "Show me the top five customers by total sales last month."</p>
 
-<p>6) Search for and select the tables the agent should use. This is the security decision from earlier, so be deliberate.</p>
-
-<p>7) Review the knowledge name and write the detailed description properly.</p>
-
-<p>8) Select <b>Add to agent</b>, then confirm it appears on the agent's <b>Knowledge</b> page.</p>
-
-<p>9) <b>Publish the agent.</b> The knowledge source is not available in the published experience until you do, and this is exactly the step that gets skipped and then generates a bug report.</p>
-
-<p>10) Test with something that must come from those tables. The article's own example: "Show me the top five customers by total sales last month."</p>
-
-<p>Those are all clicks, which raises the obvious question if you read the Dataverse piece: can this one be created from code instead? I have not checked, and I am not going to guess. The connection is a Power Platform connection and the knowledge source is a row somewhere, so there is a fair chance <a href="https://www.theworkbench.blog/2026/08/copilot-studio-adding-dataverse.html">the same approach</a> applies. But that is a hypothesis, and it belongs in a follow-up where I can show it working rather than in a paragraph where I speculate about it.</p>
+<p>That is still a walk through a dialog, which raises the obvious question if you read the Dataverse piece: can this one be created from code instead? I have not checked, and I am not going to guess. The connection is a Power Platform connection and the knowledge source is a row somewhere, so there is a fair chance <a href="https://www.theworkbench.blog/2026/08/copilot-studio-adding-dataverse.html">the same approach</a> applies. But that is a hypothesis, and it belongs in a follow-up where I can show it working rather than in a paragraph where I speculate about it.</p>
 
 <p><b>Companion repo sketch</b></p>
 
