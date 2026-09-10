@@ -12,7 +12,9 @@
 
 <p><b>Background</b></p>
 
-<p>Until now, grounding a Copilot Studio agent meant pointing it at content that was, broadly speaking, prose: SharePoint documents, websites, uploaded files, Dataverse tables. If your answer lived in a relational database in Azure, you either built a tool that queried it and shaped the result yourself, or you exported the data somewhere the agent could already read. Both work. Neither is what you would call delightful.</p>
+<p>Until now, grounding a Copilot Studio agent meant pointing it at content that was, broadly speaking, prose: SharePoint documents, websites, uploaded files, <a href="https://www.theworkbench.blog/2026/08/copilot-studio-adding-dataverse.html">Dataverse tables</a>. If your answer lived in a relational database in Azure, you either built a tool that queried it and shaped the result yourself, or you exported the data somewhere the agent could already read. Both work. Neither is what you would call delightful.</p>
+
+<p>Dataverse is the one I have spent real time on, in <a href="https://www.theworkbench.blog/2026/08/copilot-studio-adding-dataverse.html">an earlier article on adding those knowledge sources with the Web API</a> instead of clicking them together in the maker portal. Worth keeping in mind as you read on, because Azure SQL is a different animal in one important respect: that Dataverse recipe works precisely because a Dataverse knowledge source is itself Dataverse rows, and here there is no intermediate copy of anything. Your data stays in your database.</p>
 
 <p>The new article is <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/knowledge-add-azure-sql-tables">Add Azure SQL tables as a knowledge source</a>. In its own words, you ground your agent in the structured data stored in your Azure SQL database, and the agent answers by reading from the tables you select.</p>
 
@@ -98,6 +100,8 @@ date. Don't use for inventory on-hand or shipping carrier tracking.
 <p>9) <b>Publish the agent.</b> The knowledge source is not available in the published experience until you do, and this is exactly the step that gets skipped and then generates a bug report.</p>
 
 <p>10) Test with something that must come from those tables. The article's own example: "Show me the top five customers by total sales last month."</p>
+
+<p>Those are all clicks, which raises the obvious question if you read the Dataverse piece: can this one be created from code instead? I have not checked, and I am not going to guess. The connection is a Power Platform connection and the knowledge source is a row somewhere, so there is a fair chance <a href="https://www.theworkbench.blog/2026/08/copilot-studio-adding-dataverse.html">the same approach</a> applies. But that is a hypothesis, and it belongs in a follow-up where I can show it working rather than in a paragraph where I speculate about it.</p>
 
 <p><b>Companion repo sketch</b></p>
 
