@@ -4,7 +4,7 @@
 <img alt="Rows without an owner: filtered record ownership brings predicate-based row-level security to Dataverse" src="https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/covers/cover-18-filtered-record-ownership.png" style="max-width:100%;" />
 </div>
 
-<p>If you have spent any real time modeling security in Dataverse, you have had this conversation. A customer describes what they want, which is almost always some variation of "this group of people should only see the rows for their region", and you reach for the tools you have: business units, teams, hierarchy security, sharing, maybe an owning team per region and a great deal of patient explaining about why the org chart and the data model now have to agree with each other forever. It works. It has worked for the better part of two decades. But you have also had the other half of that conversation, the one where the customer says "but the region is just a column on the record", and you have to explain why a column cannot grant access, and why the answer involves restructuring their business units.</p>
+<p>If you have spent any real time modeling security in Dataverse, you have had this conversation. A customer wants "this group of people should only see the rows for their region", and you reach for the tools you have: business units, teams, hierarchy security, sharing, maybe an owning team per region and a great deal of patient explaining about why the org chart and the data model now have to agree with each other forever. It works. It has worked for the better part of two decades. But you have also had the other half of that conversation, the one where the customer says "but the region is just a column on the record", and you have to explain why a column cannot grant access, and why the answer involves restructuring their business units.</p>
 
 <p>Well, in late September a new article appeared in the Power Apps developer documentation, dated September 23, 2026, and it describes a genuinely new answer to that conversation. It is called <b>filtered record ownership</b>, and the short version is this: a table whose rows have no owner at all, where access is decided by a FetchXML predicate evaluated against the row's own column values.</p>
 
@@ -18,7 +18,7 @@
 
 <p><b>The model, in three objects</b></p>
 
-<p>Once you see the pieces, the design is clean and it is worth laying out before any code.</p>
+<p>The design is clean once you see the pieces, and it is worth laying out before any code.</p>
 
 <p>First, the <b>table</b>. You create it with its <code>OwnershipType</code> set to a new member, <code>Filtered</code>, which has the value <code>32</code>. Rows in such a table have no owner. They cannot be assigned and they cannot be shared. And you cannot change the ownership type after the table is created, so this is a decision you make once, at design time, and live with.</p>
 
@@ -26,9 +26,9 @@
 
 <p>Third, the <b>entity record filter</b>, stored in a new <code>entityrecordfilter</code> table, which associates a record filter with a Dataverse table. A table can have several, so "City equals Redmond" and "City in Kirkland or Sammamish" can coexist as separate, independently activated predicates against the same table.</p>
 
-<p>Then a security role grants a given filter for one or more of the <b>Create</b>, <b>Read</b>, <b>Write</b>, <b>Delete</b>, <b>Append</b> and <b>Append to</b> privileges, and you assign the role to users or teams. So, to put the whole chain in one sentence: a FetchXML predicate becomes a named filter, the filter is attached to a table, and a security role hands that filter to people for specific operations.</p>
+<p>A security role then grants a filter for one or more of the <b>Create</b>, <b>Read</b>, <b>Write</b>, <b>Delete</b>, <b>Append</b> and <b>Append to</b> privileges, and you assign the role to users or teams. So, the whole chain in one sentence: a FetchXML predicate becomes a named filter, the filter is attached to a table, and a security role hands that filter to people for specific operations.</p>
 
-<p>Access is <i>cumulative</i>. The documentation puts it precisely: access is the union of the filters granted through all security roles assigned to the user or their teams. Grant somebody the Redmond filter through one role and the Kirkland filter through another, and they see both cities. Nobody is subtracting anything. Keep that firmly in mind when you are debugging why a user sees more than you expected, because the answer is almost always a second role you forgot about.</p>
+<p>Access is <i>cumulative</i>. The documentation puts it precisely: access is the union of the filters granted through all security roles assigned to the user or their teams. Grant somebody the Redmond filter through one role and the Kirkland filter through another, and they see both cities. Nobody is subtracting anything, so when a user sees more than you expected, the answer is almost always a second role you forgot about.</p>
 
 <p><b>Creating the table in code</b></p>
 
@@ -91,7 +91,7 @@ CreateResponse createRecordFilterResponse =
 Guid recordFilterId = createRecordFilterResponse.id;
 </code></pre>
 
-<p>A few things to note. The FetchXML is stored as plain text on the row, and its root <code>&lt;entity&gt;</code> name must match the table this filter will be associated with. Notice also that this uses <code>CreateRequest</code> rather than the more convenient <code>service.Create(entity)</code>, and that is deliberate: <code>CreateRequest</code> is what lets you set the <code>SolutionUniqueName</code> optional parameter. Give the filter a unique name with your publisher prefix, the same as any other component.</p>
+<p>Two things in there are deliberate. The FetchXML is stored as plain text on the row, and its root <code>&lt;entity&gt;</code> name must match the table this filter will be associated with. Notice also that this uses <code>CreateRequest</code> rather than the more convenient <code>service.Create(entity)</code>, and that is deliberate: <code>CreateRequest</code> is what lets you set the <code>SolutionUniqueName</code> optional parameter. Give the filter a unique name with your publisher prefix, the same as any other component.</p>
 
 <p>Then you associate the filter with the table:</p>
 
@@ -108,7 +108,7 @@ createEntityRecordFilterRequest["SolutionUniqueName"] = "&lt;Solution Unique Nam
 service.Execute(createEntityRecordFilterRequest);
 </code></pre>
 
-<p>A few things to note. <code>objecttypecode</code> takes the table's logical name as a string, and <code>recordfilterid</code> is a lookup back to the filter you just created. In the Web API the same association is made with the <code>RecordFilterId@odata.bind</code> navigation property. This row is what <i>activates</i> the predicate for that table, which is why the maker documentation describes creating one as the step that turns a filter on.</p>
+<p><code>objecttypecode</code> takes the table's logical name as a string, and <code>recordfilterid</code> is a lookup back to the filter you just created. In the Web API the same association is made with the <code>RecordFilterId@odata.bind</code> navigation property. This row is what <i>activates</i> the predicate for that table, which is why the maker documentation describes creating one as the step that turns a filter on.</p>
 
 <p><b>Why it matters, for makers</b></p>
 
@@ -124,11 +124,11 @@ service.Execute(createEntityRecordFilterRequest);
 
 <p>The first is that the ownership type is immutable. <code>Filtered</code> is chosen at <code>CreateEntityRequest</code> time and cannot be changed afterward, which means this is not something you retrofit onto an existing table. It is a modeling decision, made up front, and the migration path from a user-owned or organization-owned table to a filtered one is "create a new table and move the data". Plan accordingly.</p>
 
-<p>The second is that these rows genuinely have no owner, and a surprising amount of the platform assumes there is one. No assignment, no sharing. Anything in your codebase or your process that reaches for <code>ownerid</code>, or calls <code>AssignRequest</code>, or grants access with <code>GrantAccessRequest</code>, simply has no counterpart here. That is not a criticism, it is the entire point of the design, but it is the kind of thing that turns up during testing rather than during design if nobody says it out loud early.</p>
+<p>The second is that a surprising amount of the platform assumes an owner exists. Anything in your codebase or your process that reaches for <code>ownerid</code>, or calls <code>AssignRequest</code>, or grants access with <code>GrantAccessRequest</code>, simply has no counterpart here. That is the point of the design rather than a criticism, but it turns up during testing rather than during design if nobody says it out loud early.</p>
 
 <p>The third is that this is now application lifecycle management surface area. Record filters and entity record filters are solution components, and the security roles that grant them are solution components too. Which means the predicate that decides who sees what is a versioned, deployable artifact that moves between environments with your solution. That is the part I find genuinely exciting, and I would even venture to say it is the more important half of this feature: your row-level security rules stop being environment configuration that somebody clicked together in production and start being something you can review in a pull request.</p>
 
-<p>One last operational note from the documentation that belongs in your runbook: deleting a record filter also deletes its associated entity record filters. Before you change or remove a filter, review every role that grants it. Pulling a predicate out from under a role that references it is not a change you want to discover from a user who suddenly cannot see anything.</p>
+<p>One operational note for your runbook: deleting a record filter also deletes its associated entity record filters. Review every role that grants a filter before you change or remove it, because pulling a predicate out from under a role is not a change you want to hear about from a user who suddenly cannot see anything.</p>
 
 <p><b>The demo I would build</b></p>
 
@@ -162,7 +162,7 @@ service.Execute(createEntityRecordFilterRequest);
     cumulative-access.md       the union rule, with the two-role walkthrough
 </code></pre>
 
-<p>A few things to note about that layout. The <code>http/</code> folder exists because this feature is one of those where seeing the raw request makes the model click in a way that an SDK wrapper hides: <code>"OwnershipType": "Filtered"</code> sitting there in a JSON body is more memorable than an enum. <code>04-inspect-filters.http</code> is the one people will actually reuse, since it is the query that answers "what filters are live on this table right now":</p>
+<p>The <code>http/</code> folder is there because seeing the raw request makes this model click in a way an SDK wrapper hides: <code>"OwnershipType": "Filtered"</code> in a JSON body is more memorable than an enum. <code>04-inspect-filters.http</code> is the one people will reuse, because it answers "what filters are live on this table right now":</p>
 
 <pre><code class="language-http">GET [Organization URI]/api/data/v9.2/entityrecordfilters?$select=name,objecttypecode,statecode&$filter=objecttypecode eq 'new_store' and statecode eq 0&$expand=RecordFilterId($select=displayname,uniquename,fetchxml) HTTP/1.1
 Accept: application/json
@@ -170,33 +170,25 @@ OData-MaxVersion: 4.0
 OData-Version: 4.0
 </code></pre>
 
-<p>A few things to note. The <code>statecode eq 0</code> condition restricts the result to active associations, and the <code>$expand</code> on <code>RecordFilterId</code> pulls the actual FetchXML of each filter into the same response, so one call gives you the complete picture of what predicates are in force on a table. That is your first stop when a user reports seeing the wrong rows.</p>
+<p>The <code>statecode eq 0</code> condition restricts the result to active associations, and the <code>$expand</code> on <code>RecordFilterId</code> pulls the actual FetchXML of each filter into the same response, so one call gives you the complete picture of what predicates are in force on a table. That is your first stop when a user reports seeing the wrong rows.</p>
 
 <p><b>Steps to recreate</b></p>
 
-<p>The maker path, which is the one to start with:</p>
+<p>The maker path is the one to start with, and <a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/filtered-view-record-ownership">the maker article</a> has the full click path. These are the steps that carry a decision:</p>
 
-<p>1) Go to <a href="https://make.powerapps.com">make.powerapps.com</a> and select your environment.</p>
+<p>1) <b>Create the table inside a solution</b>, and set <b>Record ownership</b> to <b>Filtered (preview)</b>. This is the one you cannot take back later.</p>
 
-<p>2) Go to <b>Solutions</b> and open or create a solution.</p>
+<p>2) <b>Build the predicate without writing XML.</b> Open your model-driven app for editing, open the table, use the <b>Filters</b> pane to add a condition such as <i>City</i> equals <i>Redmond</i>, then select <b>Download FetchXML</b>.</p>
 
-<p>3) Select <b>New table</b> on the command bar, then select <b>Table (advanced properties)</b>.</p>
+<p>3) <b>Create a Record Filter</b> in the solution and paste that FetchXML into it, with a unique name carrying your prefix.</p>
 
-<p>4) Enter a <b>Display name</b>, and from the <b>Record ownership</b> list select <b>Filtered (preview)</b>. Select <b>Save</b>. Remember, you cannot change this later.</p>
+<p>4) <b>Create an EntityRecordFilter</b> pointing at that filter, with the table's logical name as the related entity. This is the row that turns the predicate on.</p>
 
-<p>5) Add your columns and a few sample rows so you have something to filter.</p>
+<p>5) <b>Grant the filter on a security role</b>, <b>Read</b> being the one to start with, and assign the role to a user or team.</p>
 
-<p>6) To build the predicate without writing XML: open your model-driven app for editing, open the table, select <b>Filters</b> at the top right of the action bar, select <b>+ Add</b> to add a condition such as <i>City</i> equals <i>Redmond</i>, then select <b>Download FetchXML</b> and open the downloaded file.</p>
+<p>6) <b>Sign in as a real nonadministrator account.</b> Not your own: the system administrator role carries an <b>All records</b> filter, so you will see everything and prove nothing.</p>
 
-<p>7) Back in your solution, select <b>+ New</b>, then <b>More</b>, then <b>Other</b>, then <b>Record Filter</b>. Enter a unique name with your prefix, a display name such as <i>City of Redmond</i>, paste in the FetchXML, and select <b>Save &amp; close</b>.</p>
-
-<p>8) In the same solution, select <b>+ New</b>, then <b>More</b>, then <b>Other</b>, then <b>EntityRecordFilter</b>. Enter a <b>Name</b>, select the <b>Record Filter</b> you just created, enter the <b>Related Entity</b> as the table's logical name, and select <b>Save &amp; close</b>.</p>
-
-<p>9) Create or edit a security role and grant the filter against the privileges you want, <b>Read</b> being the one to start with. Then assign the role to a user or team.</p>
-
-<p>10) Sign in as that nonadministrator user and open the table. Be sure to use a real second account, not your own.</p>
-
-<p>The prerequisite for all of this is the system administrator security role, which you need in order to configure the feature and the security roles.</p>
+<p>You need the system administrator role yourself to configure any of it.</p>
 
 <p><b>Final Notes</b></p>
 
