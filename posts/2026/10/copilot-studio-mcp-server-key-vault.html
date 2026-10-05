@@ -1,0 +1,186 @@
+<!-- Cover image is hosted in the public theworkbench-assets repo. If you prefer Google-hosted
+     images, re-upload the PNG through the Blogger editor before you publish. -->
+<div style="text-align:center;">
+<img alt="Your MCP server now needs a vault: the updated Microsoft MCP server certification path" src="https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/covers/cover-19-mcp-certification.png" style="max-width:100%;" />
+</div>
+
+<p>Part of my weekly routine, and it has quietly become one of the more useful hours I spend, is a pass over the Microsoft Copilot Studio documentation looking for the changes that actually matter to people who build things. Most weeks none of them do. On September 26, 2026, one page in that set grew by a few hundred characters, precisely the size of change I would normally note and then forget about.</p>
+
+<p>As it turns out, those few hundred characters were carrying a schema version bump, a hard calendar deadline, and a new requirement that obliges you to stand up Azure infrastructure before you can submit anything at all. Quite a lot of consequence for a small diff!</p>
+
+<p>The page is <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-certification">Microsoft MCP server certification overview (preview)</a>, and its own footer now reads <i>Last updated 2026-09-26</i>. Let us take a look.</p>
+
+<p><b>Background</b></p>
+
+<p>First, the vocabulary. The <b>Model Context Protocol</b>, almost always written MCP, is an open protocol for exposing tools and actions to an AI agent, so the agent can call your service without anyone hand building a one-off integration. An <b>MCP server</b> is the thing on your side that speaks it, and <b>certification</b> is the review Microsoft runs before yours becomes broadly discoverable.</p>
+
+<p>Now, the core of the process did not change, and the article is careful to say so: verified publishers submit a package, Microsoft validates it and gets issues remediated before approval, and publishers remain responsible for the certified experience afterward. What changed is nearly everything around that core:</p>
+
+<ul>
+<li>The manifest example moved off the preview schema. It was <code>vDevPreview</code> with <code>"manifestVersion": "devPreview"</code>. It is now the <b>v1.30</b> Teams schema with a plain <code>"version": "1.30"</code>.</li>
+<li>Submissions go through the Partner Center offer type <b>Apps and Agents for M365 and Copilot</b>, and the legacy path stays open only <b>through October 31, 2026</b>. The article blames high submission volume during preview, and warns the new path might be slower.</li>
+<li>Every submission now requires a manifest file, a tool file, an intro file and an <b>Azure Key Vault authentication configuration</b>. That last one is the requirement with real setup work behind it.</li>
+<li>The list of publishing surfaces grew from Azure Foundry and Copilot Studio to <b>Azure Foundry, Cowork, Copilot chat and Copilot Studio</b>.</li>
+<li>A new FAQ entry states plainly that <b>Dynamic Client Registration is not supported today</b>.</li>
+<li>If you already ship an M365 Agent containing an MCP server, you do not submit it separately. Those become standalone MCP servers automatically later this year.</li>
+</ul>
+
+<p>NOTE: most of the byte count in that edit is prose being reflowed into bullet lists, which is exactly why a change like this is easy to skim past. The schema version and the Key Vault requirement were sitting in the middle of what looked like a formatting pass.</p>
+
+<p><b>The Problem</b></p>
+
+<p>Two problems, really, on different clocks. The first is the manifest on your disk right now: if you built against the preview schema, it declares <code>manifestVersion</code> and points at a <code>vDevPreview</code> URL, and the documented example no longer resembles it. The second is the Key Vault requirement, which is not a field you fill in. It is an Azure resource, precisely named secrets, a Microsoft service principal and a role assignment, all of which must exist before validation can retrieve your OAuth configuration.</p>
+
+<p>Here is the manifest skeleton as the article now documents it, trimmed to the parts that carry the change:</p>
+
+<pre><code class="language-json">{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.30/MicrosoftTeams.schema.json",
+  "version": "1.30",
+  "id": "&lt;APP_ID&gt;",
+  "agentConnectors": [
+    {
+      "id": "&lt;CONNECTOR_ID&gt;",
+      "displayName": "&lt;CONNECTOR_DISPLAY_NAME&gt;",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "&lt;MCP_SERVER_URL&gt;",
+          "mcpToolDescription": { "file": "mcptools.json" },
+          "authorization": {
+            "type": "AzureKeyVault",
+            "referenceId": "https://contoso-mcp-kv.vault.azure.net/"
+          }
+        }
+      }
+    }
+  ],
+  "icons": { "outline": "Outline.png", "color": "Color.png" }
+}</code></pre>
+
+<p>A few things to note. The server is declared under <code>agentConnectors</code>, with <code>toolSource.remoteMcpServer</code> holding the endpoint, so a certified MCP server is modeled as a connector rather than its own top level object. Your tool schemas sit in the separate file named by <code>mcpToolDescription.file</code>, here <code>mcptools.json</code>. And look closely at <code>referenceId</code>: the article says twice that this must be the <b>Key Vault URI and not a secret URI</b>, which tells you how often it arrives wrong. One more that bites quietly, Microsoft supports <b>ASCII header names and values only</b> in the manifest and tool files.</p>
+
+<p><b>Why It Matters</b></p>
+
+<p>If you are a maker, the effect is about what you can expect to find and trust. Certification decides which MCP servers appear as vetted options, and the surface list growing to include Cowork and Copilot chat means a server certified once becomes discoverable in more places without further work by its publisher. You are not submitting anything, but you are the beneficiary of the review.</p>
+
+<p>If you are a professional developer, this is a work item with a date attached. The new path is the one to target, October 31 is when the old one closes, and the Key Vault configuration touches your Azure subscription and somebody else's change process. Read the eligibility rules first: you must be a verified publisher whose Partner Center account has completed business verification, be enrolled in the Microsoft 365 and Copilot program, and own or control the endpoint you submit.</p>
+
+<p><b>Implementation</b></p>
+
+<p>The article documents the Key Vault setup as a portal exercise. It is also the part most likely to go wrong, so I am going to give you the whole Azure side as a script first, and then walk the steps behind it:</p>
+
+<p>1) Create an Azure Key Vault in your Azure tenant. The documentation specifies the Azure portal, so what follows is my Az PowerShell equivalent of steps 1 through 3, which you can run end to end:</p>
+
+<pre><code class="language-powershell"># Install-Module Az -Scope CurrentUser   # if you do not already have it
+Connect-AzAccount
+
+$subscription = '&lt;SUBSCRIPTION_ID&gt;'
+$resourceGroup = 'rg-mcp-cert'
+$location = 'eastus'
+$vaultName = 'contoso-mcp-kv'                             # must be globally unique
+$certServiceAppId = '8e91e74f-afe9-41cd-8c3f-17a9562a74ea'  # Microsoft's certification service
+
+Set-AzContext -Subscription $subscription | Out-Null
+
+# Step 1: the vault itself. On Az 12.0.0 and later, RBAC authorization is the default
+New-AzResourceGroup -Name $resourceGroup -Location $location -Force | Out-Null
+$vault = New-AzKeyVault -Name $vaultName `
+                        -ResourceGroupName $resourceGroup `
+                        -Location $location
+
+# Step 2: the secrets. These names are case sensitive and must match exactly
+$secrets = [ordered]@{
+    ClientId     = '&lt;CLIENT_ID&gt;'
+    ClientSecret = '&lt;CLIENT_SECRET&gt;'
+    TokenUrl     = 'https://login.example.com/oauth2/token'
+    # AuthorizationUrl               = '...'   # required for an OAuth2 provider
+    # RefreshUrl                     = '...'   # when you issue refresh tokens
+    # Scopes                         = '...'   # when your provider needs scopes
+    # AzureActiveDirectoryResourceId = '...'   # required for an Azure AD provider
+}
+
+foreach ($name in $secrets.Keys) {
+    $secure = ConvertTo-SecureString $secrets[$name] -AsPlainText -Force
+    Set-AzKeyVaultSecret -VaultName $vaultName -Name $name -SecretValue $secure | Out-Null
+    Write-Host "stored $name"
+}
+
+# Step 3: Microsoft's service principal, then read access to the vault
+$sp = Get-AzADServicePrincipal -ApplicationId $certServiceAppId -ErrorAction SilentlyContinue
+if (-not $sp) { $sp = New-AzADServicePrincipal -ApplicationId $certServiceAppId }
+
+New-AzRoleAssignment -ObjectId $sp.Id `
+                     -RoleDefinitionName 'Key Vault Secrets User' `
+                     -Scope $vault.ResourceId
+
+# Step 4: this is the value that goes into the manifest
+Write-Host "authorization.referenceId = $($vault.VaultUri)"</code></pre>
+
+<p>A few things to note, because two of them will cost you a submission cycle. The first is what is <i>not</i> in that <code>New-AzKeyVault</code> call. The article grants access with an RBAC role, and an RBAC role assignment does nothing on a vault running legacy access policies, so you may reach for <code>-EnableRbacAuthorization</code>. Do not: it was removed in Az 12.0.0, replaced by <code>-DisableRbacAuthorization</code>, and <b>RBAC is now the default</b>, which is why the call omits it. See the <a href="https://learn.microsoft.com/powershell/azure/migrate-az-12.0.0">Az 12.0.0 migration guide</a>. The trap that survives is reusing an <i>existing</i> vault built the old way, where the role assignment looks like it succeeded and grants nothing. Fix that with <code>Update-AzKeyVault -DisableRbacAuthorization $false</code>.</p>
+
+<p>The second is that those secret names are the literal keys of the hash table on purpose: the article devotes a whole FAQ entry to confirming <b>secret names are case sensitive and should match exactly</b>, and <code>ClientId</code> is not <code>clientid</code>. Note too that <code>New-AzADServicePrincipal</code> is not creating an application of yours, it is instantiating Microsoft's in your tenant so the role assignment has something to bind to. And the last line prints <code>$vault.VaultUri</code>, exactly what the manifest wants for <code>referenceId</code>.</p>
+
+<p>2) Store the required secrets in the vault: <code>ClientId</code>, <code>ClientSecret</code> and <code>TokenUrl</code>. Then add the optional ones your identity provider needs. <code>AuthorizationUrl</code> is required for an OAuth2 provider, <code>AzureActiveDirectoryResourceId</code> is required for an Azure AD provider, and <code>RefreshUrl</code> and <code>Scopes</code> come into play for refresh tokens and scoped access respectively.</p>
+
+<p>3) Create a service principal for the Microsoft application <code>8e91e74f-afe9-41cd-8c3f-17a9562a74ea</code>, and grant it <b>Key Vault Secrets User</b>, or an equivalent RBAC read role, on the vault. This is what lets the certification service retrieve your OAuth configuration during validation.</p>
+
+<p>4) Add the vault URI to the manifest as <code>authorization.referenceId</code>, exactly as shown above.</p>
+
+<p>5) Go to Partner Center and proceed to create a new offer, selecting the offer type <b>Apps and Agents for M365 and Copilot</b>. Upload the package and supply the required commercial, legal, support and publisher information.</p>
+
+<p>6) Let automated validation run against package structure, required fields, schema correctness and metadata completeness. Blocking issues must be fixed before the functional and safety review continues. Including evaluation evidence, meaning representative functional and safety test results, can help accelerate that review.</p>
+
+<p><b>The demo, and a companion repo</b></p>
+
+<p>So I built one, and you can clone it: <a href="https://github.com/dgpblogster/mcp-cert-lab">github.com/dgpblogster/mcp-cert-lab</a>. Very nearly every requirement on that page is mechanically verifiable before you ever open Partner Center, which makes a readiness checker the obvious companion piece: one PowerShell script that takes a package folder, and optionally looks at the vault behind it.</p>
+
+<p>Laying it out the way I laid out <a href="https://github.com/dgpblogster/project-orion-lab">project-orion-lab</a>, the hands-on companion to my <i>Same Agent, Two Architectures: When MCP Wins (And When It Doesn't)</i> session at Community Summit NA 2026, which is to say a README that carries the prerequisites and one folder per moving part:</p>
+
+<pre><code class="language-text">mcp-cert-lab/
+  README.md                     what each check maps to in the article
+  Test-McpCertReadiness.ps1     the checker
+  samples/
+    good-package/               passes cleanly
+      manifest.json             v1.30, vault URI, every field populated
+      mcptools.json             three tools, JSON Schema inputs
+      intro.md                  with a Known issues and limitations section
+      Color.png  Outline.png    192x192 and 32x32
+    bad-package/                eight planted defects in one file
+      manifest.json             devPreview schema, secret URI, a smart quote
+  tests/
+    Invoke-Tests.ps1            asserts good passes AND bad is caught, by name</code></pre>
+
+<p>A few things to note about the shape of that. The checker runs with no Azure connection at all unless you pass <code>-CheckVault</code>, which is deliberate: most of what fails a submission fails on disk. It exits <b>0</b> when nothing failed and <b>1</b> when anything did, so it works as a pipeline gate. And <code>bad-package</code> is not filler, it is the instrument that proves the checker still works.</p>
+
+<p>Pointed at the deliberately broken package, it reports:</p>
+
+<pre><code class="language-text">FAIL   Schema     $schema points at v1.30  (still on the retired vDevPreview schema)
+FAIL   Schema     manifestVersion removed  (replaced by version in the v1.30 shape)
+FAIL   Schema     version is 1.30  (found: 1.0.0)
+FAIL   Metadata   developer.termsOfUseUrl  (placeholder left in: &lt;TERMS_OF_USE_URL&gt;)
+FAIL   Icons      color icon on disk  (Color.png not found)
+FAIL   Connector  [contoso-shopfloor] tool file on disk  (mcptools.json not found)
+FAIL   Connector  [contoso-shopfloor] referenceId is a vault URI  (this is a SECRET URI, use the vault URI)
+FAIL   Ascii      manifest.json ASCII only  (U+2019 at line 18 col 55)
+
+16 passed, 9 failed, 1 warnings
+Not ready to submit.</code></pre>
+
+<p>That last line is the one I care about most. <code>U+2019 at line 18 col 55</code> is a curly apostrophe, the kind that arrives when somebody pastes a company name out of an email, and the article is explicit that non-ASCII characters might cause validation failures. It is invisible in every editor you are likely to be using. Finding it by line and column in half a second, rather than by elimination after a rejected submission, is the whole argument for writing the thing.</p>
+
+<p>Two places where I deliberately stopped short, because a checker that overreaches is one people turn off. Icon <b>dimensions are reported, not asserted</b>, since the exact sizes live in Teams guidance outside this article. And the intro file is a <b>warning rather than a failure</b>, for the reason in the Final Notes below. Everything else is a hard pass or fail, including the vault checks, where secret names are compared <b>case sensitively</b>.</p>
+
+<p><b>Final Notes</b></p>
+
+<p>Three closing thoughts.</p>
+
+<p>First, this is preview documentation and says so at the top, so the schema version, the package requirements and the surface list are all fair game to change again before general availability. The one item with a fixed date is the October 31, 2026 close of the legacy path, and that is what I would plan around.</p>
+
+<p>Second, a small inconsistency worth knowing about rather than tripping over. The <i>What's changing</i> table states that all submissions require a manifest file, tool file, intro.md file and Key Vault configuration, while a section further down the same page is headed <i>Intro file (Optional)</i>. The two disagree. The safe course is to include the intro file, which you want anyway, with a <i>Known issues and limitations</i> section in it.</p>
+
+<p>Finally, the observation I keep coming back to. Read that list of publishing surfaces once more: Azure Foundry, Cowork, Copilot chat, Copilot Studio. One certification, four destinations, with Microsoft 365 admin governance applying across them where relevant. That is the real story hiding inside a small diff. Certifying an MCP server is drifting away from being a Copilot Studio errand and toward being how a tool gets admitted to the Microsoft agent ecosystem generally, and the entry fee is a manifest, a vault and a review.</p>
+
+<p>Until next post!</p>
+
+<p>MG.-<br/>
+Mariano Gomez Bent<br/>
+Former Microsoft BizApps MVP</p>
