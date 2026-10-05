@@ -54,7 +54,7 @@
   "icons": { "outline": "Outline.png", "color": "Color.png" }
 }</code></pre>
 
-<p>A few things to note. The server is declared under <code>agentConnectors</code>, with <code>toolSource.remoteMcpServer</code> holding the endpoint, so a certified MCP server is modeled as a connector rather than its own top level object. Your tool schemas sit in the separate file named by <code>mcpToolDescription.file</code>, here <code>mcptools.json</code>. And look closely at <code>referenceId</code>: the article says twice that this must be the <b>Key Vault URI and not a secret URI</b>, which tells you how often it arrives wrong. One more that bites quietly, Microsoft supports <b>ASCII header names and values only</b> in the manifest and tool files.</p>
+<p>The server is declared under <code>agentConnectors</code>, with <code>toolSource.remoteMcpServer</code> holding the endpoint, so a certified MCP server is modeled as a connector rather than its own top level object. Your tool schemas sit in the separate file named by <code>mcpToolDescription.file</code>, here <code>mcptools.json</code>. And look closely at <code>referenceId</code>: the article says twice that this must be the <b>Key Vault URI and not a secret URI</b>, which tells you how often it arrives wrong. One more that bites quietly, Microsoft supports <b>ASCII header names and values only</b> in the manifest and tool files.</p>
 
 <p><b>Why It Matters</b></p>
 
@@ -113,7 +113,7 @@ New-AzRoleAssignment -ObjectId $sp.Id `
 # Step 4: this is the value that goes into the manifest
 Write-Host "authorization.referenceId = $($vault.VaultUri)"</code></pre>
 
-<p>A few things to note, because two of them will cost you a submission cycle. The first is what is <i>not</i> in that <code>New-AzKeyVault</code> call. The article grants access with an RBAC role, and an RBAC role assignment does nothing on a vault running legacy access policies, so you may reach for <code>-EnableRbacAuthorization</code>. Do not: it was removed in Az 12.0.0, replaced by <code>-DisableRbacAuthorization</code>, and <b>RBAC is now the default</b>, which is why the call omits it. See the <a href="https://learn.microsoft.com/powershell/azure/migrate-az-12.0.0">Az 12.0.0 migration guide</a>. The trap that survives is reusing an <i>existing</i> vault built the old way, where the role assignment looks like it succeeded and grants nothing. Fix that with <code>Update-AzKeyVault -DisableRbacAuthorization $false</code>.</p>
+<p>Two of these will cost you a submission cycle. The first is what is <i>not</i> in that <code>New-AzKeyVault</code> call. The article grants access with an RBAC role, and an RBAC role assignment does nothing on a vault running legacy access policies, so you may reach for <code>-EnableRbacAuthorization</code>. Do not: it was removed in Az 12.0.0, replaced by <code>-DisableRbacAuthorization</code>, and <b>RBAC is now the default</b>, which is why the call omits it. See the <a href="https://learn.microsoft.com/powershell/azure/migrate-az-12.0.0">Az 12.0.0 migration guide</a>. The trap that survives is reusing an <i>existing</i> vault built the old way, where the role assignment looks like it succeeded and grants nothing. Fix that with <code>Update-AzKeyVault -DisableRbacAuthorization $false</code>.</p>
 
 <p>The second is that those secret names are the literal keys of the hash table on purpose: the article devotes a whole FAQ entry to confirming <b>secret names are case sensitive and should match exactly</b>, and <code>ClientId</code> is not <code>clientid</code>. Note too that <code>New-AzADServicePrincipal</code> is not creating an application of yours, it is instantiating Microsoft's in your tenant so the role assignment has something to bind to. And the last line prints <code>$vault.VaultUri</code>, exactly what the manifest wants for <code>referenceId</code>.</p>
 
@@ -147,7 +147,7 @@ Write-Host "authorization.referenceId = $($vault.VaultUri)"</code></pre>
   tests/
     Invoke-Tests.ps1            asserts good passes AND bad is caught, by name</code></pre>
 
-<p>A few things to note about the shape of that. The checker runs with no Azure connection at all unless you pass <code>-CheckVault</code>, which is deliberate: most of what fails a submission fails on disk. It exits <b>0</b> when nothing failed and <b>1</b> when anything did, so it works as a pipeline gate. And <code>bad-package</code> is not filler, it is the instrument that proves the checker still works.</p>
+<p>On the shape of that. The checker runs with no Azure connection at all unless you pass <code>-CheckVault</code>, which is deliberate: most of what fails a submission fails on disk. It exits <b>0</b> when nothing failed and <b>1</b> when anything did, so it works as a pipeline gate. And <code>bad-package</code> is not filler, it is the instrument that proves the checker still works.</p>
 
 <p>Pointed at the deliberately broken package, it reports:</p>
 
