@@ -8,6 +8,10 @@
 
 <p>The article is <a href="https://learn.microsoft.com/en-us/power-automate/power-automate-plugin-external-tools">Get started with the Power Automate plugin for GitHub Copilot CLI and Claude Code</a>, dated 2026-09-16 in the Power Automate documentation. Same marketplace, different plugin, and this one goes after cloud flows: create, edit, run, debug and manage, all from a terminal.</p>
 
+<p>Which is where I owe you a pointer, because this is not my first look at it. <a href="https://www.theworkbench.blog/2026/08/building-power-automate-flows-with.html">Back on August 13</a> I wrote about building flows with Claude Code and FlowAgent, and FlowAgent is the MCP server that ships inside this very plugin. I wrote about it under the server's name rather than the plugin's, which is partly why the two do not obviously look like the same thing.</p>
+
+<p>That piece ended on a list of rough edges, and one of them is now closed: the resubmit and diagnose tools both threw type errors at the time, and I worked around them by calling the Power Automate REST API directly. That fix shipped in v3.0.4 on August 25. So if you read that article and have been resubmitting runs the long way ever since, you can stop. The plugin is several releases on from the one in that post, and what follows is what changed and what I still could not make work.</p>
+
 <p>Now, I did not want to write this one from the page. Anybody can summarize a doc. So I installed it, pointed it at a throwaway Developer environment, and tried to build something. What follows is what actually happened, which turned out to be considerably more interesting than the happy path.</p>
 
 <p><b>Background</b></p>
