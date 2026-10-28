@@ -364,6 +364,7 @@
   /* media embeds: center videos, and neutralize the legacy line-break tags
      that stack phantom blank lines around media blocks */
   .post-body iframe { display: block; margin: 1.4em auto 0.6em; max-width: 100%; }
+  .post-body iframe[src*="video.g"] { width: 100%; height: auto; aspect-ratio: 16 / 9; }
   .post-body iframe + br { display: none; }
   .post-body iframe + br + div + br { display: none; }
   .post-body table.tr-caption-container + br { display: none; }
