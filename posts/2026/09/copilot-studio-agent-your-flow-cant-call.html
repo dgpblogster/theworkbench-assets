@@ -1,0 +1,103 @@
+<!-- Cover image is hosted in the public theworkbench-assets repo. If you prefer Google-hosted
+     images, re-upload the PNG through the Blogger editor before you publish. -->
+<div style="text-align:center;">
+<img alt="The agent your flow can't call: Copilot Studio harness choice" src="https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/covers/cover-14-copilot-harness-split.png" style="max-width:100%;" />
+</div>
+
+<p>There is a particular kind of bad afternoon in this business. You have built the thing, it works, you demo it, everyone is happy. Then somebody asks the obvious follow-up question, the one that was always coming: "great, now can the nightly flow call it?" And you go to wire it up and discover that the answer is no, not because you did anything wrong, but because of a choice you made on day one without knowing it was a choice.</p>
+
+<p>Microsoft published a short new article in mid-August that will save somebody that afternoon. It is worth reading before you build your next agent rather than after.</p>
+
+<p><b>Background</b></p>
+
+<p>The article is <a href="https://learn.microsoft.com/en-us/power-automate/call-copilot-studio-agent">Call Microsoft Copilot Studio agents from Power Automate</a>, new in the Power Automate documentation and last updated August 18, 2026. It opens with a two-row table, and that table is the whole post:</p>
+
+<blockquote>Standard harness: Call the agent from a Power Automate cloud flow by using the Microsoft Copilot Studio connector.<br/><br/>GitHub Copilot harness: Use the agent node in a Copilot Studio workflow. You can't call this type of agent from a Power Automate cloud flow by using the Microsoft Copilot Studio connector.</blockquote>
+
+<p>Now, a <b>harness</b> needs defining, because the word is new enough that plenty of people building agents right now have never seen it. Per the <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/harnesses-overview">harnesses overview</a>, you design the agent and the model supplies the reasoning, and the harness is the runtime sitting between the two: it decides when to call the model, what to send it, how to interpret what comes back, and which tools to call. Everything you build in Copilot Studio runs on one.</p>
+
+<p>There are three. The <b>GitHub Copilot harness</b> powers agents and workflows built for reasoning-heavy, multistep work, and bills through Copilot Credits on usage. The <b>standard harness</b> powers rule-based agents and agent flows, where you define the topics and paths and get predictable behavior. The <b>Copilot chat harness</b> is for extending Microsoft 365 Copilot.</p>
+
+<p>So the harness is not a setting you flip later. It determines how your agent reasons, how you are billed, and, as of this article, what can call it.</p>
+
+<p><b>This was not one article</b></p>
+
+<p>Here is the part that makes me confident this is a real platform move rather than a documentation footnote. That new Power Automate page did not arrive alone. Across the same week, roughly a hundred Copilot Studio articles were touched, and the substantive edits among them all point the same direction: Microsoft is retiring the informal vocabulary and replacing it with harness names everywhere.</p>
+
+<p>Pages that used to say "the classic experience" and "the new agent experience" now say "the standard harness" and "agents powered by the GitHub Copilot harness." The telemetry articles were split along the same line: agent-level telemetry is now documented as available <i>only</i> with the standard harness, while environment-level telemetry works with both. The article on adding tools to an agent was amended to say that coding-agent skills can only be added to agents powered by the GitHub Copilot harness. Even the old skills article was reworded to name both harnesses explicitly.</p>
+
+<p>One renamed page is housekeeping. A hundred pages renamed in one week, with capability boundaries drawn along the new names, is a platform telling you that this distinction is now load-bearing.</p>
+
+<p><b>Why it matters</b></p>
+
+<p>For <b>makers</b>, the practical consequence is a question you now have to ask at the start: does anything else need to call this agent? If a scheduled flow, an approval process, or an existing automation has to invoke it, you want the standard harness, because that is the one the Power Automate connector can reach. If the agent is going to be talked to by humans and needs to reason its way through messy multistep work, the GitHub Copilot harness is the more capable runtime, and you accept that your integration path runs through Copilot Studio workflows instead.</p>
+
+<p>You may be asking whether that is a real constraint or just a temporary gap. The documentation does not say, and I am not going to guess. What it does say is what works today, and today the connector supports one harness and not the other.</p>
+
+<p>For <b>professional developers</b>, the sharper point is that this is an architectural decision wearing the costume of a product setting. It sits alongside two others made at the same moment: your billing model, since the GitHub Copilot harness runs on Copilot Credits and the standard harness runs on the licensing model, and your observability model, since agent-level telemetry export is standard-harness only. Three consequences, one choice, made in a dropdown before you have written anything.</p>
+
+<p>NOTE: there is a workaround, and it is a legitimate one rather than a hack, but it does change your topology. You call a GitHub Copilot harness agent from an <b>agent node</b> inside a Copilot Studio workflow. That means the orchestration lives in Copilot Studio rather than in Power Automate. If your organization's automation estate, source control, and deployment pipeline are all built around cloud flows, that is not a small relocation.</p>
+
+<p><b>The demo concept</b></p>
+
+<p>Build the same trivial agent twice, once on each harness, and then try to call both from one cloud flow. The standard harness agent answers. The other one is not selectable, because it never appears in the connector's agent picker at all.</p>
+
+<p>That is the demonstration worth recording, because it is a negative result and negative results are what documentation tends to bury. Then build the workflow-plus-agent-node path for the second agent and show it working. Two agents, two integration paths, one screen recording, and nobody on your team ever has that bad afternoon.</p>
+
+<p><b>Steps to recreate</b></p>
+
+<p>First, the supported path. These steps are quoted from the new article.</p>
+
+<p>1) Sign in to Power Automate.</p>
+
+<p>2) Create a cloud flow, or open an existing cloud flow and select <b>Edit</b>.</p>
+
+<p>3) In the designer, select the plus sign (<b>+</b>) where you want to call the agent, and then select <b>Add an action</b>.</p>
+
+<p>4) Search for <b>Microsoft Copilot Studio</b>, and then select <b>Execute Agent and wait</b>.</p>
+
+<p>5) If prompted, sign in with Microsoft Entra ID to create a connection.</p>
+
+<p>6) In <b>Agent</b>, select the published standard harness agent that you want to call.</p>
+
+<p>7) In <b>Message</b>, enter the instructions for the agent. You can add dynamic content from earlier steps in the flow.</p>
+
+<p>8) Configure the optional inputs your scenario needs: <b>Locale</b> (the language of the message, as a BCP-47 locale), <b>Conversation ID</b> (an existing conversation ID, to continue an agent conversation), and <b>Environment ID</b> (the environment that contains the agent).</p>
+
+<p>9) Add any actions that should use the agent's response, then select <b>Save</b> and test the flow.</p>
+
+<p>A few things to note about that sequence. The word <b>published</b> in step 6 is not filler: an unpublished agent will not be there to pick, and that is the first thing to check when the dropdown looks empty. <b>Execute Agent and wait</b> blocks the flow until the agent responds, which is what you want when the next action consumes the answer; the article notes that if you do not need to wait, the plain <b>Execute Agent</b> action sends the message and returns the conversation ID instead. And that conversation ID is the interesting output, because passing it back in on the next call is what turns a series of one-shot invocations into an actual conversation. The action surfaces the last response, a list of responses, and the conversation ID as dynamic content.</p>
+
+<p>Now the other path, for a GitHub Copilot harness agent:</p>
+
+<p>1) In Copilot Studio, go to <b>Workflows</b> and open an existing workflow, or create a new one.</p>
+
+<p>2) On the <b>Add</b> panel, select the <b>Agent</b> icon.</p>
+
+<p>3) Under <b>Agent</b>, select <b>An existing agent</b>, and then select the published GitHub Copilot harness agent you want to call.</p>
+
+<p>4) In <b>Message</b>, enter the instructions for this run, adding dynamic content from earlier workflow steps as needed.</p>
+
+<p>5) Add the later workflow steps that use the agent response, and test the workflow before you publish it.</p>
+
+<p>Notice the symmetry. Both paths are an agent-invoking step with a message and a response, and both want the target published first. The difference is entirely which product hosts the orchestration, which is exactly why the constraint is easy to miss until it bites: the shape of the work is identical, only the address changes.</p>
+
+<p><b>Companion repo sketch</b></p>
+
+<p>A small comparison lab. Two exported solutions, <code>agent-standard/</code> and <code>agent-ghcopilot/</code>, each holding the same deliberately boring agent so the harness is the only variable. A <code>flow-caller/</code> solution with the cloud flow that calls the standard harness agent through <b>Execute Agent and wait</b>. A <code>workflow-caller/</code> solution with the Copilot Studio workflow that reaches the other one through an agent node.</p>
+
+<p>Then the file that makes the repository worth cloning: a <code>MATRIX.md</code> recording what each harness supports, with the observed result and the date beside every row. Connector callable, agent-level telemetry, coding-agent skills, billing model. Date every row, because this is a moving platform and an undated compatibility matrix is worse than none at all. It ages into confident misinformation.</p>
+
+<p><b>Final Notes</b></p>
+
+<p>The change itself is one table in one short article. What makes it worth your time is the timing: it landed in the same week that a hundred sibling pages were rewritten to make harness the organizing noun of the whole product. That is not a coincidence, and it is a reasonable bet that more capability boundaries get drawn along this line before the year is out.</p>
+
+<p>So ask the integration question first. Before the topics, before the knowledge sources, before anybody sees a demo: what needs to be able to call this? The answer picks your harness, and the harness picks a great deal else.</p>
+
+<p>What I learned from this exercise: the most expensive decisions on a platform are rarely the ones that look like decisions. They look like defaults.</p>
+
+<p>Until next post!</p>
+
+<p>MG.-<br/>
+Mariano Gomez Bent<br/>
+Former Microsoft BizApps MVP</p>
