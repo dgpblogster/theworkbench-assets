@@ -1,0 +1,66 @@
+<!-- Cover image hosted in the public theworkbench-assets repo. -->
+<div style="text-align:center;">
+<img alt="Works on My Agent: the Copilot Studio portal shows the connector, the exported source shows the per-agent tool grant" src="https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/covers/cover-26-connected-agent-access.png" style="max-width:100%;" />
+</div>
+
+<p>Your multi-agent demo works perfectly, because you own everything in it.</p>
+
+<p>Then you share the primary agent with the team, and it stops working for them in a way that doesn't look like a permissions problem. Here is the sentence that explains it, straight out of the documentation:</p>
+
+<blockquote><p>Access to a parent agent doesn't automatically grant access to its connected agents. Share each connected agent separately with every intended user or group.</p></blockquote>
+
+<p>Sharing is not transitive. And once you pull that thread, three different things in a connected-agent setup turn out not to be transitive, each failing differently.</p>
+
+<p><b>One: the connected agents themselves</b></p>
+
+<p>A connected agent is a separate agent with its own orchestration, tools and knowledge. Sharing the parent shares the parent. The children stay exactly as private as they were.</p>
+
+<p>It bites the maker before it bites the user, too: the prerequisite for adding a connected agent at all is that the maker of the primary owns it or has had it shared with them. A team where everyone builds their own agents has to share in both directions before it can compose anything.</p>
+
+<p><b>Two: the workflow in the middle</b></p>
+
+<p>If your shared agent invokes a workflow that uses an agent node to call another agent <b>with the user's connection</b>, that user needs access to the workflow's environment, and sharing the agent does not grant it. The failure mode is worth quoting because it tells you where to look: the agent node action fails <b>before</b> calling the second agent. The symptom shows at the hop, and the cause is an environment permission two steps away from it.</p>
+
+<p><b>Three: the connections</b></p>
+
+<p>Connections are tied to the identity of each individual agent user. The documentation is blunt that this makes sharing agents with external service connections "challenging", and the consequence it names is the title of this post. Three ways out: a service principal where the connector supports one, environment-level connections so the agent runs under a shared non user-specific identity, or individual authentication, which is the honest answer when OAuth is genuinely per-person.</p>
+
+<p>One caveat before you bank all three. They are stated on the connected-agent and sharing pages written for the <b>GitHub Copilot harness</b>, which those pages name in their prerequisites. The governance guidance is not harness-scoped, but the sharing mechanics are.</p>
+
+<p><b>The part that should worry a reviewer</b></p>
+
+<p>Everything above is an availability problem. This one is the opposite, and it sits in the governance guidance rather than the how-to, which is why it gets read less.</p>
+
+<p>A connected agent might have access to things the parent does not. The documentation's own example: if the parent isn't allowed to delete records but the connected agent is, the parent shouldn't call the connected agent in scenarios where deletion might happen without proper approval.</p>
+
+<p>That is a confused deputy, and the platform will not stop you building one. The advice is to treat a connected agent call like any other powerful action and subject it to the checks or user consent it deserves. Same conclusion the hooks feature pointed at: the orchestrator decides, so your controls have to sit somewhere the orchestrator cannot talk its way around.</p>
+
+<p><b>What the source says</b></p>
+
+<p>I had a setup to try this on, built for a conference demo: an order orchestrator with no tools of its own, delegating to Sales, Finance and Inventory specialists that all reach business data through one shared MCP server. Standard harness, which is what made its exported definitions worth reading rather than its portal pages.</p>
+
+<p>The specialists are <b>not</b> standing on identical ground. In the portal, all three show the same single entry under Tools, the shared MCP server, which reads like identical access. The exported action says <code>UseSpecificTools</code>, with a disjoint tool list per agent and a separate connection reference each. Sales cannot call the credit tools; Finance cannot call the inventory tools. The portal shows you the connector; the source shows you the grant.</p>
+
+<p>Every delegation hands over the whole conversation. All three actions carry <code>historyType: ConversationHistory</code>, so whatever the orchestrator is holding crosses into an agent with its own access list. Confirm that setting rather than assume it: a <b>child</b> agent always receives the parent's context, while a <b>connected</b> agent is configurable.</p>
+
+<p>And every MCP call runs with <code>mode: Invoker</code>, under the signed-in user's connection. That is non-transitive thing number three, visible in source before anyone tests it.</p>
+
+<p><b>The lab</b></p>
+
+<p><a href="https://github.com/dgpblogster/connected-agent-access">connected-agent-access</a> carries the pre-share checklist and the access matrix you fill in per agent. The agents themselves are at <a href="https://github.com/dgpblogster/cronus-order-management-agents">cronus-order-management-agents</a>, exported, sanitized, and documented, so you can check every claim above against source rather than taking my word for it.</p>
+
+<p><b>Final Notes</b></p>
+
+<p>The useful mental model is that a connected agent is a separate product your agent happens to call. Its own access list, its own transcripts, potentially its own privileges. Nothing about being reachable from your agent changes any of that.</p>
+
+<p>So the test for "is this shared properly" is not whether the parent opens. It is whether somebody who is not you can complete the whole path, with their own identity, through every hop. Nobody has run that test on the CRONUS set, and the repo says so rather than let the matrix imply otherwise.</p>
+
+<p>"Works on my machine" got solved by making the machine reproducible. The agent version is harder, because the thing that differs between you and your colleague isn't the runtime. It is the access, and access does not travel with the thing you shared.</p>
+
+<p>What I learned from this exercise: when a system composes separately-governed parts, the interesting failures are never in the parts. They are at the joins, and the maker portal, which is where you would go looking, is exactly where the joins are hardest to see.</p>
+
+<p>Until next post!</p>
+
+<p>MG.-<br/>
+Mariano Gomez Bent<br/>
+Former Microsoft BizApps MVP</p>
