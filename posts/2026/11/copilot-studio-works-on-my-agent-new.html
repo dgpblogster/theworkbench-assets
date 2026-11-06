@@ -33,7 +33,7 @@
 
 <p>A connected agent might have access to things the parent does not. <a href="https://learn.microsoft.com/microsoft-copilot-studio/guidance/multi-agent-patterns#connected-agents">The documentation's own example</a>: if the parent isn't allowed to delete records but the connected agent is, the parent shouldn't call the connected agent in scenarios where deletion might happen without proper approval.</p>
 
-<p>That is a confused deputy, and the platform will not stop you from building one. The advice is to treat a connected agent call like any other powerful action and subject it to the checks or user consent it deserves. Same conclusion the hooks feature pointed at: the orchestrator decides, so your controls have to sit somewhere the orchestrator cannot talk its way around.</p>
+<p>To borrow a term of art from computer security, that is a <b>confused deputy</b>: something that holds more privilege than its caller and gets talked into spending that privilege on the caller's behalf. The platform will not stop you from building one. The advice is to treat a connected agent call like any other powerful action and subject it to the checks or user consent it deserves. Same conclusion the hooks feature pointed at: the orchestrator decides, so your controls have to sit somewhere the orchestrator cannot talk its way around.</p>
 
 <p><b>What the source says</b></p>
 
