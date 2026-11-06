@@ -31,7 +31,7 @@
 
 <p>Everything above is an availability problem. This one is the opposite, and it sits in the governance guidance rather than the how-to, which is why it gets read less.</p>
 
-<p>A connected agent might have access to things the parent does not. The documentation's own example: if the parent isn't allowed to delete records but the connected agent is, the parent shouldn't call the connected agent in scenarios where deletion might happen without proper approval.</p>
+<p>A connected agent might have access to things the parent does not. <a href="https://learn.microsoft.com/microsoft-copilot-studio/guidance/multi-agent-patterns#connected-agents">The documentation's own example</a>: if the parent isn't allowed to delete records but the connected agent is, the parent shouldn't call the connected agent in scenarios where deletion might happen without proper approval.</p>
 
 <p>That is a confused deputy, and the platform will not stop you building one. The advice is to treat a connected agent call like any other powerful action and subject it to the checks or user consent it deserves. Same conclusion the hooks feature pointed at: the orchestrator decides, so your controls have to sit somewhere the orchestrator cannot talk its way around.</p>
 
