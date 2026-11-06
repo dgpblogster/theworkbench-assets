@@ -5,7 +5,7 @@
 
 <p>Your multi-agent demo works perfectly, because you own everything in it.</p>
 
-<p>Then you share the primary agent with the team, and it stops working for them in a way that doesn't look like a permissions problem. Here is the sentence that explains it, straight out of the documentation:</p>
+<p>Then you share the primary agent with the team, and it stops working for them in a way that doesn't look like a permissions problem. Here is the sentence that explains it, straight out of <a href="https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/add-agent-connected">the documentation</a>:</p>
 
 <blockquote><p>Access to a parent agent doesn't automatically grant access to its connected agents. Share each connected agent separately with every intended user or group.</p></blockquote>
 
@@ -19,11 +19,11 @@
 
 <p><b>Two: the workflow in the middle</b></p>
 
-<p>If your shared agent invokes a workflow that uses an agent node to call another agent <b>with the user's connection</b>, that user needs access to the workflow's environment, and sharing the agent does not grant it. The failure mode is worth quoting because it tells you where to look: the agent node action fails <b>before</b> calling the second agent. The symptom shows at the hop, and the cause is an environment permission two steps away from it.</p>
+<p>If your shared agent invokes a workflow that uses an agent node to call another agent <b>with the user's connection</b>, that user needs access to the workflow's environment, and sharing the agent does not grant it. The <a href="https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/authoring-share-agent#share-an-agent-for-viewing-and-testing">failure mode</a> is worth quoting because it tells you where to look: the agent node action fails <b>before</b> calling the second agent. The symptom shows at the hop, and the cause is an environment permission two steps away from it.</p>
 
 <p><b>Three: the connections</b></p>
 
-<p>Connections are tied to the identity of each individual agent user. The documentation is blunt that this makes sharing agents with external service connections "challenging", and the consequence it names is the title of this post. Three ways out: a service principal where the connector supports one, environment-level connections so the agent runs under a shared non user-specific identity, or individual authentication, which is the honest answer when OAuth is genuinely per-person.</p>
+<p>Connections are tied to the identity of each individual agent user. The documentation is <a href="https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/authoring-share-agent#share-an-agent-for-viewing-and-testing">blunt</a> that this makes sharing agents with external service connections "challenging", and the consequence it names is the title of this post. Three ways out: a service principal where the connector supports one, environment-level connections so the agent runs under a shared non user-specific identity, or individual authentication, which is the honest answer when OAuth is genuinely per-person.</p>
 
 <p>One caveat before you bank all three. They are stated on the connected-agent and sharing pages written for the <b>GitHub Copilot harness</b>, which those pages name in their prerequisites. The governance guidance is not harness-scoped, but the sharing mechanics are.</p>
 
