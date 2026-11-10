@@ -36,21 +36,21 @@
 
 <p>Which raises the obvious question: should this be a custom server at all, when Microsoft ships MCP servers for SQL?</p>
 
-<p>The first thing most of us reach for is the wrong one. The <b>Azure MCP Server</b> has a <code>sql</code> namespace, and it is control-plane: list servers, get database details, list firewall rules and elastic pools, create a server. It manages the resource, it cannot read your rows, and it replaces nothing that answers a business question.</p>
+<p>The first thing most of us reach for is the wrong one. The <b>Azure MCP Server</b> has a <a href="https://learn.microsoft.com/azure/developer/azure-mcp-server/tools/azure-sql"><code>sql</code> namespace</a>, and it is control-plane: list servers, get database details, list firewall rules and elastic pools, create a server. It manages the resource, it cannot read your rows, and it replaces nothing that answers a business question.</p>
 
-<p>The data-plane one is <b>SQL MCP Server</b>, part of Data API builder. It exposes seven generic DML tools, <code>read_records</code> and <code>execute_entity</code> among them.</p>
+<p>The data-plane one is <b>SQL MCP Server</b>, part of Data API builder. It exposes <a href="https://learn.microsoft.com/azure/data-api-builder/mcp/data-manipulation-language-tools">seven generic DML tools</a>, <code>read_records</code> and <code>execute_entity</code> among them.</p>
 
 <p>NOTE: that word generic is a trap, and it is this whole post in miniature. My eight tools are domain-specific, and the domain specificity is what makes <code>UseSpecificTools</code> expressive. Hand an agent a generic DML surface and the most precise grant you can write is <code>read_records</code>, which reads every entity you exposed. The scoping does not get weaker; it stops existing.</p>
 
-<p>Two features turn that around. Its role-based access control is per entity and per field, and the documentation is explicit that those rules apply automatically to every MCP tool. And a stored procedure can be registered as a named MCP tool with <code>"custom-tool": true</code>, so a credit-exposure calculation stays a named tool instead of dissolving into <code>read_records</code>. Together they move the grant to the server side, where neither the orchestrator nor anyone holding the URL can route around it.</p>
+<p>Two features turn that around. Its role-based access control is per entity and per field, and the documentation is explicit that <a href="https://learn.microsoft.com/azure/data-api-builder/mcp/overview#support-for-rbac">those rules apply automatically to every MCP tool</a>. And a stored procedure can be <a href="https://learn.microsoft.com/azure/data-api-builder/mcp/how-to-configure-custom-tools">registered as a named MCP tool</a> with <code>"custom-tool": true</code>, so a credit-exposure calculation stays a named tool instead of dissolving into <code>read_records</code>. Together they move the grant to the server side, where neither the orchestrator nor anyone holding the URL can route around it.</p>
 
 <p>That is a rewrite rather than a migration, so I am not going to wave at it in a closing paragraph and call it advice. Actually rebuilding the eight tools that way is the subject of another post.</p>
 
 <p><b>Most SQL Server is not in Azure</b></p>
 
-<p>Worth saying out loud, because everything above reads like an Azure story and it is not one. Data API builder is open source and free, and the documentation describes the server as self hosted, able to run locally through the DAB command line. It reaches a database over a connection string. Your data does not have to move, and neither do you.</p>
+<p>Worth saying out loud, because everything above reads like an Azure story and it is not one. Data API builder is open source and free, and the documentation describes the server as <a href="https://learn.microsoft.com/azure/data-api-builder/mcp/overview#mcp-server-for-sql">self hosted, able to run locally through the DAB command line</a>. It reaches a database over a connection string. Your data does not have to move, and neither do you.</p>
 
-<p>SQL Server 2025's own what's-new list carries SQL MCP Server under Developer, pointing at that same documentation, so there is no separate on-premises MCP server to go hunting for. And the feature-availability matrix marks stored-procedure custom tools as supported for MSSQL, which is the one capability this post leans on hardest.</p>
+<p>SQL Server 2025's own <a href="https://learn.microsoft.com/sql/sql-server/what-s-new-in-sql-server-2025?view=sql-server-ver17#developer">what's-new list</a> carries SQL MCP Server under Developer, pointing at that same documentation, so there is no separate on-premises MCP server to go hunting for. And the <a href="https://learn.microsoft.com/azure/data-api-builder/feature-availability#mcp-server">feature-availability matrix</a> marks stored-procedure custom tools as supported for MSSQL, which is the one capability this post leans on hardest.</p>
 
 <p>What does not change is reach. Copilot Studio still has to get to the endpoint, so the tunnel-or-host question is identical whether the database sits in Azure SQL or in your own rack. Moving the grant to the server is a governance decision, not a migration.</p>
 
