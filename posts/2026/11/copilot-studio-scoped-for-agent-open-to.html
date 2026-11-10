@@ -1,0 +1,73 @@
+<!-- Cover image hosted in the public theworkbench-assets repo. -->
+<div style="text-align:center;">
+<img alt="Scoped for the agent, open to the URL: a Copilot Studio tool grant is enforced by the orchestrator, not by the MCP server" src="https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/covers/cover-27-grant-client-side.png" style="max-width:100%;" />
+</div>
+
+<p>An order-qualification demo I built for a conference runs on three Copilot Studio specialist agents, and they have genuinely different permissions. The Sales agent cannot pull a credit profile. The Finance agent cannot see inventory. That finding, and why the maker portal hides it behind a single shared connector name, is <a href="https://www.theworkbench.blog/2026/11/copilot-studio-works-on-my-agent-new.html">Works on My Agent, the New "Works on My Computer"</a>, published November 6, 2026. The agents themselves, their custom MCP server and the demo database are published at <a href="https://github.com/dgpblogster/cronus-order-management-agents">cronus-order-management-agents</a>, so none of what follows has to be taken on trust.</p>
+
+<p>Then I went looking for the code that enforces those permissions, and that is where this stopped being a documentation story.</p>
+
+<p><b>The setup, briefly</b></p>
+
+<p>An orchestrator with no tools of its own delegates to the three specialists, and all three reach business data through a single <b>custom</b> MCP server holding eight tools. Custom in the Copilot Studio sense: one I wrote and added by URL, rather than one picked from the gallery. Each agent's action declares <code>UseSpecificTools</code> with its own disjoint slice of those eight: four for Sales, two for Finance, two for Inventory. A real constraint rather than a prompt, and it holds whatever the model decides it wants.</p>
+
+<p><b>Where I expected to find the check</b></p>
+
+<p>On the server. A tool grant that matters is one the data source also believes in, so I opened the MCP server source expecting an API key check or a bearer token, something that would reject a call for <code>get_inventory</code> arriving on a Finance credential.</p>
+
+<p>There is no authentication in it at all. No key check, no token, no identity. The server answers whatever reaches <code>/mcp</code>.</p>
+
+<p>The connector agrees, which is the part worth looking at, because it means this was not an oversight on one side only. From the exported connector definition:</p>
+
+<pre><code>&quot;securityDefinitions&quot;: {},
+&quot;security&quot;: []</code></pre>
+
+<p>Those two empty values are an OpenAPI definition saying there is no authentication scheme and no scheme applied to any operation. The connector's <code>connectionparameters.json</code> is likewise an empty object. Copilot Studio is not quietly holding a credential back; it has none to send, and the server would not check one if it did.</p>
+
+<p><b>So what exactly is the grant?</b></p>
+
+<p>Real, and entirely client-side.</p>
+
+<p>Copilot Studio honors the tool list. The Finance agent cannot call <code>get_inventory</code>, today or under a prompt-injection attempt, because the tool is not in its catalog. That is worth having. What it is not is a permission on the data: it constrains what the model may ask for and does nothing to anyone talking to the server directly. My own setup notes for that demo said <code>devtunnel create --allow-anonymous</code>, so for as long as the tunnel was up the whole eight-tool surface was one URL away for anybody who had it.</p>
+
+<p>None of this is a Copilot Studio defect. It did precisely what it documents. The mistake was mine, and it is an easy one: I read a tool list as an access control. A catalog governs what the orchestrator may reach for; a permission governs what the data will answer. They look identical right up until the caller is not your agent.</p>
+
+<p><b>Putting the control where it cannot be routed around</b></p>
+
+<p>Which raises the obvious question: should this be a custom server at all, when Microsoft ships MCP servers for SQL?</p>
+
+<p>The first thing most of us reach for is the wrong one. The <b>Azure MCP Server</b> has a <code>sql</code> namespace, and it is control-plane: list servers, get database details, list firewall rules and elastic pools, create a server. It manages the resource, it cannot read your rows, and it replaces nothing that answers a business question.</p>
+
+<p>The data-plane one is <b>SQL MCP Server</b>, part of Data API builder. It exposes seven generic DML tools, <code>read_records</code> and <code>execute_entity</code> among them.</p>
+
+<p>NOTE: that word generic is a trap, and it is this whole post in miniature. My eight tools are domain-specific, and the domain specificity is what makes <code>UseSpecificTools</code> expressive. Hand an agent a generic DML surface and the most precise grant you can write is <code>read_records</code>, which reads every entity you exposed. The scoping does not get weaker; it stops existing.</p>
+
+<p>Two features turn that around. Its role-based access control is per entity and per field, and the documentation is explicit that those rules apply automatically to every MCP tool. And a stored procedure can be registered as a named MCP tool with <code>"custom-tool": true</code>, so a credit-exposure calculation stays a named tool instead of dissolving into <code>read_records</code>. Together they move the grant to the server side, where neither the orchestrator nor anyone holding the URL can route around it.</p>
+
+<p>That is a rewrite rather than a migration, so I am not going to wave at it in a closing paragraph and call it advice. Actually rebuilding the eight tools that way is the subject of another post.</p>
+
+<p><b>Most SQL Server is not in Azure</b></p>
+
+<p>Worth saying out loud, because everything above reads like an Azure story and it is not one. Data API builder is open source and free, and the documentation describes the server as self hosted, able to run locally through the DAB command line. It reaches a database over a connection string. Your data does not have to move, and neither do you.</p>
+
+<p>SQL Server 2025's own what's-new list carries SQL MCP Server under Developer, pointing at that same documentation, so there is no separate on-premises MCP server to go hunting for. And the feature-availability matrix marks stored-procedure custom tools as supported for MSSQL, which is the one capability this post leans on hardest.</p>
+
+<p>What does not change is reach. Copilot Studio still has to get to the endpoint, so the tunnel-or-host question is identical whether the database sits in Azure SQL or in your own rack. Moving the grant to the server is a governance decision, not a migration.</p>
+
+<p><b>The lab</b></p>
+
+<p>Inside the repo linked at the top, the server's <a href="https://github.com/dgpblogster/cronus-order-management-agents/blob/main/mcp-server/DEPLOYMENT.md">DEPLOYMENT.md</a> carries the three routes and their sources: dev tunnel, hosting it properly, and the Data API builder question above. The six-table demo database ships as a SQL script, so the whole thing runs. The checklist for the sharing side is in <a href="https://github.com/dgpblogster/connected-agent-access">connected-agent-access</a>. Fair warning: it publishes a server with no authentication and says so in the first section of its README, because the point of publishing it is that the gap is visible.</p>
+
+<p><b>Final Notes</b></p>
+
+<p>There is one question to ask of any tool grant in any orchestrator, and it is not whether the grant is honored. It is: who enforces this when the caller is not the agent?</p>
+
+<p>If the answer is the orchestrator, you have a catalog: useful, worth configuring carefully, not a permission. If it is the server or the identity the call runs under, you have a permission, and the catalog is a convenience sitting on top of one.</p>
+
+<p>What I learned from this exercise: a control you can only see from inside the thing it is controlling is a control you have not tested.</p>
+
+<p>Until next post!</p>
+
+<p>MG.-<br/>
+Mariano Gomez Bent<br/>
+Former Microsoft BizApps MVP</p>
