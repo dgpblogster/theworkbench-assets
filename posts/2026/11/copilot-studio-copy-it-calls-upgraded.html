@@ -9,27 +9,31 @@
 
 <p><b>What changed</b></p>
 
-<p><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/upgrade-to-github-copilot-from-standard-harness">Upgrade agents to the GitHub Copilot harness</a> is new and in preview. You ask for the upgrade in natural language on the Copilot Studio home page, Copilot Studio asks you to confirm or clarify as it goes, and when it finishes, the new agent and any workflows it produced appear as cards in the chat. The new agent's tile carries its old name followed by <b>(Upgraded)</b>.</p>
+<p><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/upgrade-to-github-copilot-from-standard-harness">Upgrade agents to the Microsoft Copilot harness</a> is new and in preview. You ask for the upgrade in natural language on the Copilot Studio home page, Copilot Studio asks you to confirm or clarify as it goes, and when it finishes, the new agent and any workflows it produced appear as cards in the chat. The new agent's tile carries its old name followed by <b>(Upgraded)</b>.</p>
 
 <p>That word is the whole design. The upgrade does not convert your agent, it builds a second one beside it, and the original keeps running on the standard harness. So the question is never "did the upgrade work" but "is the copy good enough to replace the original."</p>
 
 <p>The page's Limitations section lists three things the upgrade does not migrate:</p>
 
 <ul>
-<li>Knowledge sources</li>
+<li>Knowledge sources. The page now adds that this harness does not support Azure AI Search as a knowledge source at all, so an agent grounded that way does not get the grounding carried over, and the documented ways back are connecting Foundry IQ as a tool or adding the Azure AI Search connector as a tool.</li>
 <li>Power Fx expressions</li>
 <li>Child agents</li>
 </ul>
 
 <p>Look at what that list has in common. Those are the three places a mature standard harness agent keeps its actual business logic: what it knows, how it computes, and who it delegates to. The things that do carry over, instructions and tools and suggested prompts, are the things you could retype in an afternoon. The upgrade moves the cheap half.</p>
 
-<p>NOTE: the upgrade consumes Copilot Credits, and so does everything the resulting agent does afterwards. The standard harness bills on the Copilot Studio licensing model and the GitHub Copilot harness bills on usage, so an upgrade is also a billing migration. Run it in a non-production environment the first time.</p>
+<p>NOTE: the upgrade consumes Copilot Credits, and so does everything the resulting agent does afterwards. The standard harness bills on the Copilot Studio licensing model and the Microsoft Copilot harness bills on usage, so an upgrade is also a billing migration. Run it in a non-production environment the first time.</p>
 
 <p><b>The guidance that arrived with it</b></p>
 
 <p>The more interesting new page is <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/choose-harness">Compare Copilot Studio agent harnesses</a>, long-form architecture guidance rather than reference documentation. Two sentences in it are worth the whole read: "Treat migration as re-architecture rather than component conversion," and, plainly, "A functioning standard harness agent doesn't need to move simply because another harness is available."</p>
 
 <p>So the platform shipped a one-sentence upgrade and, in the same breath, guidance saying the upgrade is not the migration. That is not a contradiction. It is Microsoft telling you the button is a head start on a rebuild, and that treating its output as a finished agent is the mistake available to you here. The article warns in the other direction too: a more capable harness can overwork a simple problem, adding reasoning, latency and credit consumption without improving the result.</p>
+
+<p><b>The harness names moved twice</b></p>
+
+<p>Before anything else, a naming note, because it will cost you a search otherwise. As of November 13, 2026, what this post and its September predecessor call the <b>GitHub Copilot harness</b> is named the <b>Microsoft Copilot harness</b> in the documentation and the product. The upgrade article is now titled "Upgrade agents to the Microsoft Copilot harness", and the overview lists Microsoft Copilot, Customer Conversation and standard. Nothing about the behavior below changed with the name. The text here has been updated; if you are looking at an older post of mine, read "GitHub Copilot harness" as "Microsoft Copilot harness".</p>
 
 <p><b>The third harness is not the one I named</b></p>
 
@@ -41,11 +45,11 @@
 
 <p><b>The two-row table is still a two-row table</b></p>
 
-<p>Here is the part that matters more than the correction. I re-read <a href="https://learn.microsoft.com/en-us/power-automate/call-copilot-studio-agent">Call Microsoft Copilot Studio agents from Power Automate</a> on October 30, and it is unchanged: a standard harness agent is callable from a cloud flow through the Microsoft Copilot Studio connector, and a GitHub Copilot harness agent is not. The September post's central constraint holds.</p>
+<p>Here is the part that matters more than the correction. I re-read <a href="https://learn.microsoft.com/en-us/power-automate/call-copilot-studio-agent">Call Microsoft Copilot Studio agents from Power Automate</a> on October 30, and it is unchanged: a standard harness agent is callable from a cloud flow through the Microsoft Copilot Studio connector, and a Microsoft Copilot harness agent is not. The September post's central constraint holds.</p>
 
-<p>But the table still has exactly two rows. It does not mention the Customer Conversation harness at all. Neither does the telemetry overview, which splits agent-level telemetry (standard harness only) from environment-level telemetry (both standard and GitHub Copilot) without a third column. Neither, remarkably, does the new guidance article, which is titled "Compare Copilot Studio agent harnesses" and compares two of them.</p>
+<p>But the table still has exactly two rows. It does not mention the Customer Conversation harness at all. Neither does the telemetry overview, which splits agent-level telemetry (standard harness only) from environment-level telemetry (both standard and Microsoft Copilot) without a third column. Neither, remarkably, does the new guidance article, which is titled "Compare Copilot Studio agent harnesses" and compares two of them.</p>
 
-<p>Other pages have caught up. The tools overview documents its file-size and MCP server limits as applying to both the GitHub Copilot and Customer Conversation harnesses, and there is now a separate MCP server article per harness.</p>
+<p>Other pages have caught up. The tools overview documents its file-size and MCP server limits as applying to both the Microsoft Copilot and Customer Conversation harnesses, and there is now a separate MCP server article per harness.</p>
 
 <p>So the three-harness model is declared in the overview and is arriving unevenly everywhere else. The practical consequence for a reader is a reading rule: when a capability page is silent about the Customer Conversation harness, the honest conclusion is that the documentation does not say, not that the answer is no. Those two are easy to conflate and only one of them is true.</p>
 
@@ -83,7 +87,7 @@
 
 <p>The September post sketched a repository with a MATRIX.md in it and said the matrix was the file that would make the thing worth cloning. It also said to date every row, because an undated compatibility matrix ages into confident misinformation.</p>
 
-<p>That file now exists: <a href="https://github.com/dgpblogster/copilot-studio-harness-matrix">copilot-studio-harness-matrix</a>. One dated matrix across all three harnesses, with the Microsoft Learn page linked beside every row: what can call each one, what telemetry each supports, which capabilities each has, the published GitHub Copilot harness runtime limits, and what the upgrade does and does not carry. Cells read <b>Not stated</b> where the documentation is silent, because Not stated and unsupported are different claims. A HISTORY.md records what has already moved, including the third-harness swap above.</p>
+<p>That file now exists: <a href="https://github.com/dgpblogster/copilot-studio-harness-matrix">copilot-studio-harness-matrix</a>. One dated matrix across all three harnesses, with the Microsoft Learn page linked beside every row: what can call each one, what telemetry each supports, which capabilities each has, the published Microsoft Copilot harness runtime limits, and what the upgrade does and does not carry. Cells read <b>Not stated</b> where the documentation is silent, because Not stated and unsupported are different claims. A HISTORY.md records what has already moved, including the third-harness swap above.</p>
 
 <p>It is read out of documentation, not measured in a tenant, and it says so at the top. That is the honest scope for a matrix anyone can re-derive by opening nine links.</p>
 
