@@ -1,0 +1,102 @@
+<!--Cover image hosted in the public theworkbench-assets repo.-->
+<div style="text-align: center;">
+<img alt="The copy it calls (Upgraded): what the Copilot Studio standard-to-GitHub-Copilot harness upgrade carries over, and the three things it does not migrate" src="https://raw.githubusercontent.com/dgpblogster/theworkbench-assets/main/covers/cover-29-harness-upgrade.png" style="max-width: 100%;" />
+</div>
+
+<p>Copilot Studio will now move an agent from one harness to another, and you start it by typing a sentence into the home page: "upgrade my Coffee Coach agent." It carries over the instructions, the tools and the suggested prompts, and it can rebuild your topics as skills or workflows. It does not bring the knowledge sources.</p>
+
+<p>A few days ago (Sep 21), I published <a href="https://www.theworkbench.blog/2026/09/copilot-studio-agent-your-flow-cant-call.html">The Agent Your Flow Can't Call</a>, which argued that the harness you pick for a Copilot Studio agent is an architectural decision wearing the costume of a product setting, and that it is not something you flip later. Six weeks on there is a button that looks a great deal like flipping it later, and a second new article explaining at length why you should not think about it that way. Read together, the pair says something neither says alone.</p>
+
+<p><b>What changed</b></p>
+
+<p><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/upgrade-to-github-copilot-from-standard-harness">Upgrade agents to the GitHub Copilot harness</a> is new and in preview. You ask for the upgrade in natural language on the Copilot Studio home page, Copilot Studio asks you to confirm or clarify as it goes, and when it finishes, the new agent and any workflows it produced appear as cards in the chat. The new agent's tile carries its old name followed by <b>(Upgraded)</b>.</p>
+
+<p>That word is the whole design. The upgrade does not convert your agent, it builds a second one beside it, and the original keeps running on the standard harness. So the question is never "did the upgrade work" but "is the copy good enough to replace the original."</p>
+
+<p>The page's Limitations section lists three things the upgrade does not migrate:</p>
+
+<ul>
+<li>Knowledge sources</li>
+<li>Power Fx expressions</li>
+<li>Child agents</li>
+</ul>
+
+<p>Look at what that list has in common. Those are the three places a mature standard harness agent keeps its actual business logic: what it knows, how it computes, and who it delegates to. The things that do carry over, instructions and tools and suggested prompts, are the things you could retype in an afternoon. The upgrade moves the cheap half.</p>
+
+<p>NOTE: the upgrade consumes Copilot Credits, and so does everything the resulting agent does afterwards. The standard harness bills on the Copilot Studio licensing model and the GitHub Copilot harness bills on usage, so an upgrade is also a billing migration. Run it in a non-production environment the first time.</p>
+
+<p><b>The guidance that arrived with it</b></p>
+
+<p>The more interesting new page is <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/choose-harness">Compare Copilot Studio agent harnesses</a>, long-form architecture guidance rather than reference documentation. Two sentences in it are worth the whole read: "Treat migration as re-architecture rather than component conversion," and, plainly, "A functioning standard harness agent doesn't need to move simply because another harness is available."</p>
+
+<p>So the platform shipped a one-sentence upgrade and, in the same breath, guidance saying the upgrade is not the migration. That is not a contradiction. It is Microsoft telling you the button is a head start on a rebuild, and that treating its output as a finished agent is the mistake available to you here. The article warns in the other direction too: a more capable harness can overwork a simple problem, adding reasoning, latency and credit consumption without improving the result.</p>
+
+<p><b>The third harness is not the one I named</b></p>
+
+<p>Correction, and it is the useful kind. The September post said there were three harnesses and named the third as the Copilot chat harness, for extending Microsoft 365 Copilot. That was accurate when it was written. It is not accurate now.</p>
+
+<p>The overview's third harness today is the <b>Customer Conversation harness</b>, in preview, and the Copilot chat rows were removed from that article's comparison tables when it arrived. An agent built on it is called a Customer Assist Agent, and it is aimed at contact-center work: voice and chat, sub-agents that each carry their own escalation path to a human representative, prebuilt <b>Escalate</b> and <b>Biometric Authentication</b> tools, publishing to a website chat or to a phone number.</p>
+
+<p>That is a different animal from a harness for extending Copilot Chat, so this is a replacement rather than a rename, and anything written against the earlier lineup now names a harness the overview no longer lists. Including, as of six weeks ago, mine.</p>
+
+<p><b>The two-row table is still a two-row table</b></p>
+
+<p>Here is the part that matters more than the correction. I re-read <a href="https://learn.microsoft.com/en-us/power-automate/call-copilot-studio-agent">Call Microsoft Copilot Studio agents from Power Automate</a> on October 30, and it is unchanged: a standard harness agent is callable from a cloud flow through the Microsoft Copilot Studio connector, and a GitHub Copilot harness agent is not. The September post's central constraint holds.</p>
+
+<p>But the table still has exactly two rows. It does not mention the Customer Conversation harness at all. Neither does the telemetry overview, which splits agent-level telemetry (standard harness only) from environment-level telemetry (both standard and GitHub Copilot) without a third column. Neither, remarkably, does the new guidance article, which is titled "Compare Copilot Studio agent harnesses" and compares two of them.</p>
+
+<p>Other pages have caught up. The tools overview documents its file-size and MCP server limits as applying to both the GitHub Copilot and Customer Conversation harnesses, and there is now a separate MCP server article per harness.</p>
+
+<p>So the three-harness model is declared in the overview and is arriving unevenly everywhere else. The practical consequence for a reader is a reading rule: when a capability page is silent about the Customer Conversation harness, the honest conclusion is that the documentation does not say, not that the answer is no. Those two are easy to conflate and only one of them is true.</p>
+
+<p><b>Why it matters</b></p>
+
+<p><b>For makers</b>, the September advice survives with one amendment. Ask the integration question first, because the connector still reaches one harness and not the other. The amendment is that "I picked wrong" is no longer fatal: there is a documented path off the standard harness, it is in preview, and it hands you back an agent with no knowledge sources attached. Budget for reattaching them rather than discovering it.</p>
+
+<p><b>For professional developers</b>, the sharper point is what the upgrade's exclusions tell you. A tool that migrates instructions and skips Power Fx is saying the target runtime does not think in Power Fx, and child agents not migrating says the same about the delegation model. If your agent's value lives in those two places, the upgrade is a scaffold rather than a 90-percent-done rebuild, and the guidance article is being honest when it calls that re-architecture.</p>
+
+<p><b>The demo concept</b></p>
+
+<p>Take a standard harness agent that has all four of the things at issue: instructions, a tool, one knowledge source, and one Power Fx expression in a topic. Run the upgrade. Then open the report it gives you and walk the (Upgraded) copy side by side with the original, naming which of the four survived.</p>
+
+<p>That is the demonstration worth recording, because the interesting output is not the new agent. It is the report, and the gap between what a reader assumes "upgrade" means and what the Limitations section actually says.</p>
+
+<p><b>Steps to recreate</b></p>
+
+<p>These steps are quoted from the upgrade article.</p>
+
+<p>1) On the Copilot Studio home page, enter something like "upgrade my Coffee Coach agent" in the input box.</p>
+
+<p>2) Follow the progress of your request in the chat. Copilot Studio prompts you to confirm or clarify details as needed, for example whether it found the right agent, or what you prefer to do with specific features of the original.</p>
+
+<p>3) When Copilot Studio finishes, your artifacts, meaning the new agent and any workflows, appear as cards in the chat. The tile for the new agent shows its name followed by <b>(Upgraded)</b>.</p>
+
+<p>4) Select the <b>Open</b> icon on any card to view or customize the artifact.</p>
+
+<p>Three is where the work is. The upgrade "reports what was migrated, what requires attention, and what was skipped," and that report is the only place the product tells you what it did not do.</p>
+
+<p>What the documentation does not give is a procedure for putting back what was skipped: no stated path for reattaching knowledge sources, re-expressing a Power Fx expression in the new runtime, or rebuilding a child agent as a connected agent or sub-agent. I am not going to invent one. Treat those three as design work on the other side of the button.</p>
+
+<p>The September constraint is unchanged on both sides, so if a cloud flow calls the agent you are upgrading, that flow stops being able to reach the copy.</p>
+
+<p><b>The companion repo</b></p>
+
+<p>The September post sketched a repository with a MATRIX.md in it and said the matrix was the file that would make the thing worth cloning. It also said to date every row, because an undated compatibility matrix ages into confident misinformation.</p>
+
+<p>That file now exists: <a href="https://github.com/dgpblogster/copilot-studio-harness-matrix">copilot-studio-harness-matrix</a>. One dated matrix across all three harnesses, with the Microsoft Learn page linked beside every row: what can call each one, what telemetry each supports, which capabilities each has, the published GitHub Copilot harness runtime limits, and what the upgrade does and does not carry. Cells read <b>Not stated</b> where the documentation is silent, because Not stated and unsupported are different claims. A HISTORY.md records what has already moved, including the third-harness swap above.</p>
+
+<p>It is read out of documentation, not measured in a tenant, and it says so at the top. That is the honest scope for a matrix anyone can re-derive by opening nine links.</p>
+
+<p><b>Final Notes</b></p>
+
+<p>The September post ended on the idea that the most expensive decisions on a platform are the ones that do not look like decisions. Six weeks later the platform added a button that makes this particular decision look reversible, and a guidance article explaining that it is reversible the way a building is reversible: you can put it somewhere else, and you will be doing construction.</p>
+
+<p>Which leaves the question in a better place. It is no longer "pick correctly or live with it," it is "pick correctly, because the exit costs you the knowledge, the expressions and the delegation." A constraint you can plan around is worth more than reassurance.</p>
+
+<p>What I learned from this exercise: when a platform ships an escape hatch and the guidance on how to think about it in the same month, read the guidance first. The hatch tells you what is possible. The guidance tells you what it costs.</p>
+
+<p>Until next post!</p>
+
+<p>MG.-<br />
+Mariano Gomez Bent<br />
+Former Microsoft BizApps MVP</p>
